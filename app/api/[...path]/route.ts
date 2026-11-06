@@ -1,4 +1,5 @@
 import { PROXY_SECRET_HEADER, backendConfig } from "@/lib/backend"
+import { clientIp, isSameOriginWrite, ownOrigins } from "@/lib/proxy-guards"
 
 /**
  * Same-origin proxy: the browser calls `/api/...` on this site, and this
@@ -14,6 +15,17 @@ import { PROXY_SECRET_HEADER, backendConfig } from "@/lib/backend"
  *   redirects of M1 belong (as in the LMS's middleware).
  * - Here both bodies are streamed, and every header in and out is decided in
  *   one readable place.
+ *
+ * Guards before forwarding (lib/proxy-guards.ts):
+ * - CSRF: a write (POST/PUT/PATCH/DELETE) whose `Origin` or `Sec-Fetch-Site`
+ *   says it came from another site is refused here with 403 `CSRF_REJECTED`
+ *   and never reaches the backend. The backend cannot check this itself: it
+ *   never sees the browser's `Origin` (dropped below).
+ * - Client IP: the visitor's address (from Vercel's `x-real-ip` /
+ *   `x-forwarded-for`) goes to the backend as `X-Client-IP`, for the login
+ *   rate limit and the session list. Any `X-Client-IP` / `X-Forwarded-For`
+ *   the caller sent is dropped first. The backend believes the header only
+ *   together with the proxy secret.
  *
  * Passed through intact: method, path, query string, body, status code,
  * `Set-Cookie` (each cookie separately), `X-Request-Id` both ways, redirects
@@ -45,6 +57,12 @@ const DROP_REQUEST = new Set([
   // would make the backend's CORS refuse Vercel preview deployments and local
   // `next dev` (http://localhost:3000) calling the live API.
   "origin",
+  // Addresses: ours is set below from the platform's headers; anything the
+  // caller sent could be forged.
+  "x-client-ip",
+  "x-forwarded-for",
+  "x-real-ip",
+  "forwarded",
 ])
 
 /** Prefixes of platform headers the backend has no use for (some carry tokens). */
@@ -74,7 +92,33 @@ function forwardHeaders(incoming: Headers, secret: string): Headers {
     out.append(name, value)
   })
   out.set(PROXY_SECRET_HEADER, secret)
+  const ip = clientIp(incoming, process.env.VERCEL === "1")
+  if (ip) out.set("X-Client-IP", ip)
   return out
+}
+
+function requestIdOf(request: Request): string {
+  const incoming = request.headers.get("x-request-id")
+  return incoming && SAFE_REQUEST_ID.test(incoming) ? incoming : crypto.randomUUID()
+}
+
+/** Same problem+json shape as the backend's own errors. */
+function problem(request: Request, path: string, status: number, title: string, code: string, detail: string) {
+  const requestId = requestIdOf(request)
+  const body = {
+    type: "about:blank",
+    title,
+    status,
+    detail,
+    instance: path,
+    code,
+    timestamp: new Date().toISOString(),
+    requestId,
+  }
+  return Response.json(body, {
+    status,
+    headers: { "Content-Type": "application/problem+json", "X-Request-Id": requestId },
+  })
 }
 
 function responseHeaders(upstream: Headers): Headers {
@@ -87,29 +131,25 @@ function responseHeaders(upstream: Headers): Headers {
   return out
 }
 
-/** The backend could not be reached: same problem+json shape as its own errors. */
+/** The backend could not be reached. */
 function unavailable(request: Request, path: string): Response {
-  const incoming = request.headers.get("x-request-id")
-  const requestId = incoming && SAFE_REQUEST_ID.test(incoming) ? incoming : crypto.randomUUID()
-  const body = {
-    type: "about:blank",
-    title: "Service Unavailable",
-    status: 503,
-    detail: "The MasterDB server cannot be reached right now. Try again in a moment.",
-    instance: path,
-    code: "SERVICE_UNAVAILABLE",
-    timestamp: new Date().toISOString(),
-    requestId,
-  }
-  return Response.json(body, {
-    status: 503,
-    headers: { "Content-Type": "application/problem+json", "X-Request-Id": requestId },
-  })
+  return problem(request, path, 503, "Service Unavailable", "SERVICE_UNAVAILABLE",
+    "The MasterDB server cannot be reached right now. Try again in a moment.")
+}
+
+/** A write from another site: refused here, never forwarded. */
+function csrfRejected(request: Request, path: string): Response {
+  console.warn(`[api proxy] ${request.method} ${path} refused: not same-origin`)
+  return problem(request, path, 403, "Forbidden", "CSRF_REJECTED",
+    "This request did not come from the MasterDB website.")
 }
 
 async function forward(request: Request): Promise<Response> {
   // The raw path and query, exactly as the browser sent them (still encoded).
   const { pathname, search } = new URL(request.url)
+  const origins = ownOrigins(request.url, request.headers, process.env.NODE_ENV !== "production")
+  if (!isSameOriginWrite(request.method, request.headers, origins)) return csrfRejected(request, pathname)
+
   const config = backendConfig()
   if (!config) return unavailable(request, pathname)
 

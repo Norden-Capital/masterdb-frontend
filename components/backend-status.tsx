@@ -2,17 +2,15 @@ import { connection } from "next/server"
 import { Suspense } from "react"
 
 import { Badge } from "@/components/ui/badge"
+import { backendFetch } from "@/lib/backend"
 
 type Status = { service: string; status: string; version: string; time: string }
 
-// Asks the backend directly from the server (BACKEND_URL), the same address the
-// /api/* proxy in next.config.ts forwards to. Nothing is sent to the browser
-// but the result.
+// Asks the backend directly from the server, with the proxy secret (see
+// lib/backend.ts). Nothing is sent to the browser but the result.
 async function fetchStatus(): Promise<Status | null> {
-  const base = process.env.BACKEND_URL
-  if (!base) return null
   try {
-    const res = await fetch(`${base}/api/v1/status`, {
+    const res = await backendFetch("/api/v1/status", {
       cache: "no-store",
       signal: AbortSignal.timeout(3000),
     })

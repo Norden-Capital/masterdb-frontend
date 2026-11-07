@@ -1,0 +1,65 @@
+import {
+  CircleAlert, CircleSlash, Download, KeyRound, LockKeyhole, LogIn, LogOut, Mail, MailCheck, MailX, RotateCcw,
+  Send, ShieldCheck, SlidersHorizontal, UserPlus,
+} from "lucide-react"
+
+import type { ActivityEntry } from "@/lib/types"
+
+type Meta = { label: string; icon: React.ComponentType<{ size?: number }>; failed?: boolean }
+
+/** How each backend ActivityAction reads on screen. */
+export const ACTIONS: Record<string, Meta> = {
+  LOGIN_SUCCEEDED: { label: "Logged in", icon: LogIn },
+  LOGIN_FAILED: { label: "Login attempt", icon: LogIn, failed: true },
+  ACCOUNT_LOCKED: { label: "Account locked", icon: LockKeyhole, failed: true },
+  LOGOUT: { label: "Logged out", icon: LogOut },
+  TWO_FACTOR_ENROLLED: { label: "Set up two-factor", icon: ShieldCheck },
+  TWO_FACTOR_RESET: { label: "Reset two-factor", icon: KeyRound },
+  RECOVERY_CODE_USED: { label: "Used a recovery code", icon: KeyRound },
+  RECOVERY_CODES_REGENERATED: { label: "New recovery codes", icon: KeyRound },
+  USER_INVITED: { label: "Invited user", icon: UserPlus },
+  INVITE_RESENT: { label: "Resent invite", icon: Send },
+  INVITE_CANCELLED: { label: "Cancelled invite", icon: MailX },
+  INVITE_ACCEPTED: { label: "Accepted invite", icon: MailCheck },
+  USER_DISABLED: { label: "Disabled user", icon: CircleSlash },
+  USER_ENABLED: { label: "Enabled user", icon: RotateCcw },
+  PERMISSIONS_CHANGED: { label: "Changed permissions", icon: SlidersHorizontal },
+  PASSWORD_CHANGED: { label: "Changed password", icon: LockKeyhole },
+  PASSWORD_RESET_REQUESTED: { label: "Asked for a password reset", icon: Mail },
+  PASSWORD_RESET: { label: "Reset password", icon: LockKeyhole },
+  SESSION_REVOKED: { label: "Ended a session", icon: LogOut },
+  SESSIONS_REVOKED: { label: "Ended sessions", icon: LogOut },
+  ACTIVITY_EXPORTED: { label: "Exported the activity log", icon: Download },
+}
+
+export function actionMeta(action: string): Meta {
+  return ACTIONS[action] ?? { label: action.toLowerCase().replace(/_/g, " "), icon: CircleAlert }
+}
+
+const REASONS: Record<string, string> = {
+  wrong_password: "Wrong password",
+  unknown_account: "No such account",
+  unknown_account_locked: "No such account (locked)",
+  account_disabled: "Account disabled",
+  account_invited: "Invite not accepted yet",
+  account_locked: "Account was locked",
+  "2fa_code": "Wrong two-factor code",
+  current_password_wrong: "Wrong current password",
+}
+
+/** The short second line under the target (mock 12 "Target" column). */
+export function detailLine(e: ActivityEntry): string {
+  const d = e.details ?? {}
+  if (typeof d.reason === "string") return REASONS[d.reason] ?? d.reason
+  if (Array.isArray(d.added) || Array.isArray(d.removed)) {
+    const add = (d.added as string[] | undefined) ?? []
+    const rem = (d.removed as string[] | undefined) ?? []
+    return [...add.map((p) => `+ ${p}`), ...rem.map((p) => `− ${p}`)].join(", ") || "No change"
+  }
+  if (typeof d.sessionsEnded === "number") return `${d.sessionsEnded} session${d.sessionsEnded === 1 ? "" : "s"} ended`
+  if (typeof d.count === "number") return `${d.count} session${d.count === 1 ? "" : "s"}`
+  if (typeof d.rows === "number") return `${d.rows} rows`
+  if (typeof d.remaining === "number") return `${d.remaining} codes left`
+  if (Array.isArray(d.permissions)) return `${d.permissions.length} permissions`
+  return ""
+}

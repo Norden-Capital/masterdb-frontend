@@ -1,6 +1,6 @@
 "use client"
 
-import { CloudDownload, Globe, Plus, Search, Trash2 } from "lucide-react"
+import { CloudDownload, Globe, Plus, RefreshCw, Search, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 
@@ -45,6 +45,21 @@ export default function DomainListPage() {
       }
     }
     if (ok) toast(`${ok} domain${ok === 1 ? "" : "s"} deleted`)
+    t.reload()
+  }
+
+  async function recheck(list: DomainItem[]) {
+    let problems = 0
+    for (const d of list) {
+      try {
+        const r = await api<{ status?: string }>(`/api/v1/dns/domains/${d.publicId}/health/check`, { method: "POST" })
+        if (r.status !== "OK") problems++
+      } catch (e) {
+        toast(`${d.name}: ${describe(e)}`, "bad")
+      }
+    }
+    toast(`${list.length} domain${list.length === 1 ? "" : "s"} re-checked${problems ? `, ${problems} not all good` : ""}`,
+      problems ? "bad" : undefined)
     t.reload()
   }
 
@@ -116,7 +131,7 @@ export default function DomainListPage() {
         columns={columns}
         rowKey={(d) => d.publicId}
         rowLabel={(d) => d.name}
-        selectable={can("DNS:DELETE") ? () => true : undefined}
+        selectable={can("DNS:DELETE") || can("DNS:RUN") ? () => true : undefined}
         search={{ placeholder: "Search domains", label: "Search domains" }}
         errorTitle="Couldn't load domains"
         empty={(d) => {
@@ -130,7 +145,10 @@ export default function DomainListPage() {
             action={can("DNS:CREATE") && <Link className="btn primary" href="/dns/add-domain"><Plus />Add domain</Link>} />
         }}
         bulkActions={(chosen) => (
-          <button className="btn text-danger" onClick={() => setConfirm(chosen)}><Trash2 />Delete</button>
+          <>
+            {can("DNS:RUN") && <button className="btn" onClick={() => recheck(chosen)}><RefreshCw />Re-check DNS</button>}
+            {can("DNS:DELETE") && <button className="btn text-danger" onClick={() => setConfirm(chosen)}><Trash2 />Delete</button>}
+          </>
         )}
       />
       <ConfirmDialog open={!!confirm} onClose={() => setConfirm(null)} danger icon={<Trash2 />}

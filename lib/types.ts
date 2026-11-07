@@ -165,3 +165,14 @@ export type DnsSnapshot = {
   recordCount: number
   records?: HostRecord[]
 }
+
+export type RecordHealth = {
+  record: "A" | "MX" | "SPF" | "DKIM" | "DMARC" | "BIMI" | "PTR"
+  status: "OK" | "PROBLEM" | "ERROR" | "NOT_CHECKED"
+  detail: string
+  expected?: string
+  found?: string
+}
+
+/** GET /api/v1/dns/domains/{id}/health; `records` empty = never checked. */
+export type HealthReport = { domain: string; status?: HealthStatus; checkedAt?: string; records: RecordHealth[] }

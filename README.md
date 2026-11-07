@@ -43,6 +43,10 @@ npm run build
   | 12 Activity log | `/activity` |
   | 13 Session expired | `/session-expired` |
   | 14 403 / 404 | `Forbidden` component, `app/not-found.tsx` |
+  | DNS: Namecheap account (no mock) | `/dns/namecheap` |
+  | DNS: Add domain + "Fetch from Namecheap" modal | `/dns/add-domain` |
+  | DNS: Domain list | `/dns/domains` |
+  | DNS: one domain (health, managed records, before/after, snapshots) | `/dns/domains/[id]` |
 
 - **Session**: `components/md/session.tsx` loads `/api/v1/auth/me` (user + effective
   permissions). `can("USERS:EDIT")` hides menu items and buttons; the API checks again. Any

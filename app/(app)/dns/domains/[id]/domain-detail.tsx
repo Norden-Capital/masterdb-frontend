@@ -13,7 +13,9 @@ import { api } from "@/lib/api"
 import { expiryInfo } from "@/lib/dns"
 import { when } from "@/lib/format"
 import type { DomainItem } from "@/lib/types"
+import { HealthPill } from "../health-pill"
 import { DnsSettingsCard } from "./dns-settings-card"
+import { HealthCard } from "./health-card"
 import { RecordsCard } from "./records-card"
 
 /** One domain: Namecheap metadata, and (jobs 3–4) its records and DNS health. */
@@ -57,6 +59,7 @@ export function DomainDetailView() {
       <div className="page-head">
         <h1 className="mono">{domain.name}</h1>
         <span className={`pill ${nc ? "blue" : "grey"}`}>{nc ? "Namecheap" : "Manual"}</span>
+        <HealthPill status={domain.healthStatus} />
         <div className="actions">
           {can("DNS:DELETE") && <button className="btn text-danger" onClick={() => setRemoving(true)}><Trash2 />Delete</button>}
         </div>
@@ -75,6 +78,7 @@ export function DomainDetailView() {
           </dl>
         </div>
       </div>
+      <HealthCard domain={domain} onChecked={load} />
       <div className="grid-2" style={{ alignItems: "start", marginTop: 16 }}>
         <DnsSettingsCard domain={domain} onSaved={() => setSettingsVersion((v) => v + 1)} />
         <RecordsCard domain={domain} settingsVersion={settingsVersion} />

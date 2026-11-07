@@ -1,5 +1,5 @@
 import {
-  CircleAlert, CircleSlash, CloudDownload, Download, Globe, History, Trash2, Upload, KeyRound, PlugZap, LockKeyhole, LogIn, LogOut, Mail, MailCheck, MailX, RotateCcw,
+  CircleAlert, CircleSlash, CloudDownload, Download, Globe, History, Stethoscope, Trash2, Upload, KeyRound, PlugZap, LockKeyhole, LogIn, LogOut, Mail, MailCheck, MailX, RotateCcw,
   Send, ShieldCheck, SlidersHorizontal, UserPlus,
 } from "lucide-react"
 
@@ -39,6 +39,7 @@ export const ACTIONS: Record<string, Meta> = {
   DNS_SETTINGS_CHANGED: { label: "Changed managed DNS records", icon: SlidersHorizontal },
   DNS_RECORDS_WRITTEN: { label: "Wrote DNS records", icon: Upload },
   DNS_RECORDS_RESTORED: { label: "Restored DNS records", icon: History },
+  DNS_HEALTH_CHECKED: { label: "Checked DNS health", icon: Stethoscope },
 }
 
 export function actionMeta(action: string): Meta {
@@ -93,6 +94,10 @@ function dnsDetail(action: string, d: Record<string, unknown>): string | null {
     case "DNS_RECORDS_WRITTEN":
     case "DNS_RECORDS_RESTORED":
       return `+${Number(d.added ?? 0)} −${Number(d.removed ?? 0)} · ${d.verified ? "verified" : "not verified"}`
+    case "DNS_HEALTH_CHECKED":
+      return typeof d.domains === "number"
+        ? `${d.domains} domains · ${Number(d.problems ?? 0)} with problems · ${Number(d.errors ?? 0)} lookup errors`
+        : ({ OK: "All good", PROBLEM: "Problems found", ERROR: "Lookup failed" } as Record<string, string>)[String(d.status)] ?? ""
     default:
       return null
   }

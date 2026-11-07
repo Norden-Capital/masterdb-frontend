@@ -4,6 +4,9 @@ import { LockKeyhole, MapPinOff } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
+import { Banner } from "@/components/md/ui"
+import { describe } from "@/lib/api"
+
 /** 403 page body (mock 14). */
 export function Forbidden({ module }: { module: string }) {
   return (
@@ -55,5 +58,36 @@ export function SkeletonRows({ cols, rows = 3 }: { cols: number; rows?: number }
         </tr>
       ))}
     </>
+  )
+}
+
+/** "Nothing here" block (mock .empty): icon, title, one sentence, optional action. */
+export function EmptyState(props: { icon: React.ReactNode; title: string; text?: React.ReactNode; action?: React.ReactNode }) {
+  return (
+    <div className="empty">
+      <div className="ic">{props.icon}</div>
+      <h3>{props.title}</h3>
+      {props.text && <p>{props.text}</p>}
+      {props.action}
+    </div>
+  )
+}
+
+/** A failed load: red banner with the backend's reason and "Try again". */
+export function ErrorState(props: { title: string; error: unknown; onRetry?: () => void; style?: React.CSSProperties }) {
+  return (
+    <Banner tone="red" title={props.title} style={props.style}>
+      {describe(props.error)}{" "}
+      {props.onRetry && <button className="link-btn" onClick={props.onRetry}>Try again</button>}
+    </Banner>
+  )
+}
+
+/** Placeholder lines while a block (not a table) loads. */
+export function LoadingState({ lines = 3, label = "Loading" }: { lines?: number; label?: string }) {
+  return (
+    <div className="loading-block" role="status" aria-busy="true" aria-label={label}>
+      {Array.from({ length: lines }, (_, i) => <span key={i} className="skel" style={{ width: `${90 - i * 17}%` }} />)}
+    </div>
   )
 }

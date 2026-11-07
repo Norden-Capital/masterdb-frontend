@@ -411,3 +411,11 @@ select.filter{appearance:none;padding-right:30px;background-image:linear-gradien
   .toast-stack{left:12px;right:12px;bottom:12px}
   .toast{min-width:0}
 }
+.loading-block{display:grid;gap:12px;padding:20px}
+.modal-foot .btn .spin{width:16px;height:16px}
+.confirm-phrase{font-family:ui-monospace,Consolas,monospace;font-weight:600;background:var(--muted);border-radius:4px;padding:0 4px}
+@media (max-width:600px){
+  .table-top{flex-wrap:wrap}.table-top .right{margin-left:0}
+  .pager .hide-sm{display:none}
+  .modal-foot{flex-wrap:wrap}
+}

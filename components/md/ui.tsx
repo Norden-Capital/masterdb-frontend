@@ -19,6 +19,8 @@ export function Modal(props: {
   children?: React.ReactNode
   footer?: React.ReactNode
   locked?: boolean
+  /** Makes body + footer one <form>: Enter submits, the footer's submit button sends it. */
+  onSubmit?: () => void
 }) {
   const titleId = useId()
   const { open, onClose, locked } = props
@@ -44,8 +46,17 @@ export function Modal(props: {
             </button>
           )}
         </div>
-        {props.children && <div className="modal-body">{props.children}</div>}
-        {props.footer && <div className="modal-foot">{props.footer}</div>}
+        {props.onSubmit ? (
+          <form noValidate onSubmit={(e) => { e.preventDefault(); props.onSubmit?.() }}>
+            {props.children && <div className="modal-body">{props.children}</div>}
+            {props.footer && <div className="modal-foot">{props.footer}</div>}
+          </form>
+        ) : (
+          <>
+            {props.children && <div className="modal-body">{props.children}</div>}
+            {props.footer && <div className="modal-foot">{props.footer}</div>}
+          </>
+        )}
       </div>
     </div>
   )

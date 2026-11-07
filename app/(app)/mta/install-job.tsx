@@ -54,8 +54,8 @@ export function InstallJob({ id, onFinished }: { id: string; onFinished?: (job: 
   const st = installStatus(job.status)
   return (
     <div className="card" style={{ marginTop: 16 }}>
-      <div className="card-head"><h2>Install on {job.serverName ?? "the server"}</h2>
-        <span className="right" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <div className="card-head" style={{ flexWrap: "wrap" }}><h2>Install on {job.serverName ?? "the server"}</h2>
+        <span className="right" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <span className={`pill ${st.tone}`}>{st.label}</span>
           <LiveStatus status={poll.status} updatedAt={poll.updatedAt} failures={poll.failures} />
         </span>

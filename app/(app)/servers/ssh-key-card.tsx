@@ -39,7 +39,7 @@ export function SshKeyCard({ title = "1. Let MasterDB log in" }: { title?: strin
               <pre className="mono" style={{ whiteSpace: "pre-wrap", wordBreak: "break-all", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: 12, margin: 0, fontSize: 12 }}>{key.publicKey}</pre>
               <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8, flexWrap: "wrap" }}>
                 <button className="btn" onClick={() => copy(key.publicKey, "Public key")}><Copy />Copy key</button>
-                <span className="muted small mono">{key.fingerprint}</span>
+                <span className="muted small mono" style={{ wordBreak: "break-all", minWidth: 0 }}>{key.fingerprint}</span>
               </div>
             </div>
           </>

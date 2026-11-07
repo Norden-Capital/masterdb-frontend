@@ -48,8 +48,8 @@ export function ConnectionCard({ server, onChange }: { server: ServerItem; onCha
   const changed = s.connectionStatus === "KEY_CHANGED"
   return (
     <div className="card">
-      <div className="card-head"><h2>SSH connection</h2>
-        <span className="right" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <div className="card-head" style={{ flexWrap: "wrap" }}><h2>SSH connection</h2>
+        <span className="right" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <ConnectionPill status={s.connectionStatus} />
           {can("SERVERS:RUN") && (
             <button className="btn" onClick={() => call("/connect").catch(() => undefined)} disabled={busy}>

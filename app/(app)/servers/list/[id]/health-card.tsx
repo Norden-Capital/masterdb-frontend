@@ -47,8 +47,8 @@ export function ServerHealthCard({ server, onChecked }: { server: ServerItem; on
 
   return (
     <div className="card" style={{ marginTop: 16 }}>
-      <div className="card-head"><h2>Health</h2>
-        <span className="right" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <div className="card-head" style={{ flexWrap: "wrap" }}><h2>Health</h2>
+        <span className="right" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           {report?.checkedAt && <span className="muted small">Checked {when(report.checkedAt)}</span>}
           {can("SERVERS:RUN") && (
             <button className="btn" onClick={recheck} disabled={busy}>

@@ -104,8 +104,8 @@ function Manager({ initial }: { initial: MtaItem }) {
   return (
     <>
       <div className="card">
-        <div className="card-head"><h2>Services on {m.name}</h2>
-          <span className="right" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div className="card-head" style={{ flexWrap: "wrap" }}><h2>Services on {m.name}</h2>
+          <span className="right" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             <span className="muted small">Read {when(m.checkedAt)}</span>
             <button className="btn" onClick={refresh} disabled={!!busy}>{busy === "status" ? <LoaderCircle className="spin" /> : <RefreshCw />}Refresh</button>
           </span>
@@ -166,8 +166,8 @@ function QueueCard({ base, canFlush }: { base: string; canFlush: boolean }) {
 
   return (
     <div className="card">
-      <div className="card-head"><h2>Mail queue</h2>
-        <span className="right" style={{ display: "flex", gap: 8 }}>
+      <div className="card-head" style={{ flexWrap: "wrap" }}><h2>Mail queue</h2>
+        <span className="right" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button className="btn" onClick={load} disabled={busy}>{busy ? <LoaderCircle className="spin" /> : <Inbox />}{queue ? "Read again" : "Read queue"}</button>
           {canFlush && <button className="btn" onClick={() => setFlushing(true)} disabled={busy}><Send />Flush</button>}
         </span>
@@ -224,7 +224,7 @@ function LogsCard({ base }: { base: string }) {
 
   return (
     <div className="card">
-      <div className="card-head"><h2>Recent logs</h2></div>
+      <div className="card-head" style={{ flexWrap: "wrap" }}><h2>Recent logs</h2></div>
       <div className="card-pad">
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
           <select className="input" style={{ width: "auto" }} aria-label="Log source" value={source} onChange={(e) => setSource(e.target.value)}>

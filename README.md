@@ -52,6 +52,10 @@ npm run build
   | Servers: one server (details, edit, Connect → check fingerprint once → Trust, optionally with the root password used once to add MasterDB's key; changed key = blocked, Owner accepts; health per check with Re-check; linked domain and HELO / MAIL FROM) | `/servers/list/[id]` |
   | MTA: Install MTA (choose a ready server, optional webmail, live steps / progress ring / scrubbed output, then the DNS preview → write card) | `/mta/install?server=&job=` |
   | MTA: MTA list (service states, versions, queue size, when read; refresh, remove from list) | `/mta/list` |
+  | Validation: Email validation (one address through one server: category, reason, the provider's reply, SMTP conversation; history 90 days) | `/validation/check` |
+  | Validation: Bulk validation (paste or open a .txt/.csv, choose servers, start; pacing per provider and pauses running now) | `/validation/bulk` |
+  | Validation: Results (one row per job) and one job live (round chart of the six categories, counters, servers, stop / resume / retry unknown / delete, exports per category + detailed CSV, addresses) | `/validation/results`, `/validation/results/[id]` |
+  | Validation: List status (every address by its latest result, in six sections) | `/validation/status` |
   | MTA: MTA manager (start / stop / restart / reset per service or all, stop and restart confirmed; mail queue and flush; recent logs) | `/mta/manager?server=` |
 
 - **Session**: `components/md/session.tsx` loads `/api/v1/auth/me` (user + effective

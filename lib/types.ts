@@ -342,3 +342,66 @@ export type CheckResult = {
   checkedBy?: string
   createdAt: string
 }
+
+export type JobStatus = "RUNNING" | "STOPPED" | "COMPLETED"
+
+/** One server of a bulk job; state/message only while the job runs. */
+export type JobServer = { publicId: string; name: string; ip: string; checked: number; state?: string; message?: string }
+
+/** A bulk validation job (GET /api/v1/validation/jobs/{id}). pending + the six = total. */
+export type ValidationJob = {
+  publicId: string
+  name: string
+  source: string
+  status: JobStatus
+  total: number
+  pending: number
+  checked: number
+  valid: number
+  bounce: number
+  softBounce: number
+  reject: number
+  catchAll: number
+  unknown: number
+  duplicates: number
+  invalid: number
+  retries: number
+  message?: string
+  servers: JobServer[]
+  perMinute?: number
+  startedBy?: string
+  createdAt: string
+  startedAt: string
+  finishedAt?: string
+}
+
+/** One address of a job, or its latest result in List status. category absent = still to check. */
+export type EmailResult = {
+  email: string
+  category?: Category
+  smtpCode?: number
+  mxHost?: string
+  reason?: string
+  reply?: string
+  serverName?: string
+  checkedAt?: string
+  jobName: string
+  jobId: string
+}
+
+export type ListStatus = { addresses: number; jobs: number; categories: Record<Category, number> }
+
+export type PacingProvider = {
+  key: string
+  label: string
+  suffixes: string[]
+  gapMs: number
+  globalGapMs: number
+  rateCooldownS: number
+  blockCooldownS: number
+  maxCooldownS: number
+}
+
+export type PacingPause = { serverName: string; serverIp: string; provider: string; label: string; failures: number; until: string; reason?: string }
+
+export type PacingView = { providers: PacingProvider[]; paused: PacingPause[] }

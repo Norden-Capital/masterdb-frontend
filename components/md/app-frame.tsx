@@ -1,7 +1,7 @@
 "use client"
 
 import {
-  Ban, ChevronDown, CircleHelp, Contact, DatabaseBackup, Filter, Globe, KeyRound, LayoutDashboard, List, LockKeyhole,
+  Ban, ChartPie, ChevronDown, CircleHelp, Contact, DatabaseBackup, Filter, Globe, KeyRound, Layers, LayoutDashboard, List, ListChecks, LockKeyhole,
   LogOut, MailSearch, Mails, Menu, PackagePlus, PanelLeftClose, PanelLeftOpen, Plus, ScrollText, Server, ServerCog, Settings,
   UserRound, Users, X,
 } from "lucide-react"
@@ -30,6 +30,9 @@ const NAV: NavItem[] = [
   { key: "suppression", label: "Suppression", icon: Ban, perm: "SUPPRESSION:VIEW", soon: true },
   { grp: "Validation" },
   { key: "email-validation", label: "Email validation", icon: MailSearch, href: "/validation/check", perm: "VALIDATION:VIEW" },
+  { key: "bulk-validation", label: "Bulk validation", icon: Layers, href: "/validation/bulk", perm: "VALIDATION:VIEW" },
+  { key: "validation-results", label: "Results", icon: ListChecks, href: "/validation/results", perm: "VALIDATION:VIEW" },
+  { key: "list-status", label: "List status", icon: ChartPie, href: "/validation/status", perm: "VALIDATION:VIEW" },
   { grp: "DNS management" },
   { key: "namecheap", label: "Namecheap account", icon: KeyRound, href: "/dns/namecheap", perm: "DNS:VIEW" },
   { key: "add-domain", label: "Add domain", icon: Plus, href: "/dns/add-domain", perm: "DNS:CREATE" },
@@ -51,6 +54,9 @@ const NAV: NavItem[] = [
 
 const TITLES: (readonly [string, string])[] = [
   ["/validation/check", "Email validation"],
+  ["/validation/bulk", "Bulk validation"],
+  ["/validation/results", "Validation results"],
+  ["/validation/status", "List status"],
   ["/dns/namecheap", "Namecheap account"],
   ["/dns/add-domain", "Add domain"],
   ["/dns/domains", "Domains"],

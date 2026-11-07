@@ -1,5 +1,5 @@
 import {
-  CircleAlert, CircleSlash, Download, Globe, KeyRound, PlugZap, LockKeyhole, LogIn, LogOut, Mail, MailCheck, MailX, RotateCcw,
+  CircleAlert, CircleSlash, CloudDownload, Download, Globe, Trash2, KeyRound, PlugZap, LockKeyhole, LogIn, LogOut, Mail, MailCheck, MailX, RotateCcw,
   Send, ShieldCheck, SlidersHorizontal, UserPlus,
 } from "lucide-react"
 
@@ -33,6 +33,9 @@ export const ACTIONS: Record<string, Meta> = {
   NAMECHEAP_ACCOUNT_SAVED: { label: "Saved the Namecheap account", icon: Globe },
   NAMECHEAP_ACCOUNT_REMOVED: { label: "Removed the Namecheap account", icon: Globe },
   NAMECHEAP_CONNECTION_TESTED: { label: "Tested the Namecheap connection", icon: PlugZap },
+  DOMAIN_ADDED: { label: "Added a domain", icon: Globe },
+  DOMAINS_IMPORTED: { label: "Imported domains from Namecheap", icon: CloudDownload },
+  DOMAIN_DELETED: { label: "Deleted a domain", icon: Trash2 },
 }
 
 export function actionMeta(action: string): Meta {
@@ -76,6 +79,12 @@ function dnsDetail(action: string, d: Record<string, unknown>): string | null {
       return `${d.added ? "Added" : "Changed"} · API user ${String(d.apiUser ?? "")} · key ${d.keyReplaced ? "set" : "kept"}`
     case "NAMECHEAP_CONNECTION_TESTED":
       return d.ok ? "Connected" : NAMECHEAP_ERRORS[String(d.code)] ?? "Failed"
+    case "DOMAIN_ADDED":
+      return "By hand"
+    case "DOMAIN_DELETED":
+      return d.source === "NAMECHEAP" ? "Was from Namecheap" : "Was added by hand"
+    case "DOMAINS_IMPORTED":
+      return `${Number(d.addedCount ?? 0)} added, ${Number(d.updatedCount ?? 0)} refreshed`
     default:
       return null
   }

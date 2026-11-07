@@ -31,8 +31,8 @@ const NAV: NavItem[] = [
   { key: "suppression", label: "Suppression", icon: Ban, perm: "SUPPRESSION:VIEW", soon: true },
   { grp: "DNS management" },
   { key: "namecheap", label: "Namecheap account", icon: KeyRound, href: "/dns/namecheap", perm: "DNS:VIEW" },
-  { key: "add-domain", label: "Add domain", icon: Plus, perm: "DNS:CREATE", soon: true },
-  { key: "domains", label: "Domain list", icon: Globe, perm: "DNS:VIEW", soon: true },
+  { key: "add-domain", label: "Add domain", icon: Plus, href: "/dns/add-domain", perm: "DNS:CREATE" },
+  { key: "domains", label: "Domain list", icon: Globe, href: "/dns/domains", perm: "DNS:VIEW" },
   { grp: "Admin" },
   { key: "users", label: "Users & permissions", icon: Users, href: "/users", perm: "USERS:VIEW" },
   { key: "activity", label: "Activity log", icon: ScrollText, href: "/activity", perm: "ACTIVITY_LOG:VIEW" },
@@ -44,6 +44,8 @@ const NAV: NavItem[] = [
 
 const TITLES: (readonly [string, string])[] = [
   ["/dns/namecheap", "Namecheap account"],
+  ["/dns/add-domain", "Add domain"],
+  ["/dns/domains", "Domains"],
   ["/users", "Users & permissions"],
   ["/activity", "Activity log"],
   ["/account", "My account"],

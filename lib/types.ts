@@ -90,3 +90,39 @@ export type NamecheapAccount = {
 }
 
 export type NamecheapTestResult = { ok: boolean; code?: string; message: string; domainCount?: number }
+
+export type DomainSource = "MANUAL" | "NAMECHEAP"
+export type HealthStatus = "OK" | "PROBLEM" | "ERROR"
+
+/** GET /api/v1/dns/domains (one row) and /api/v1/dns/domains/{id}. */
+export type DomainItem = {
+  publicId: string
+  name: string
+  source: DomainSource
+  /** Namecheap metadata (dates as YYYY-MM-DD); absent for manual domains. */
+  registeredAt?: string
+  expiresAt?: string
+  expired?: boolean
+  autoRenew?: boolean
+  locked?: boolean
+  usesNamecheapDns?: boolean
+  namecheapSyncedAt?: string
+  /** Absent = never checked. */
+  healthStatus?: HealthStatus
+  healthCheckedAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+/** GET /api/v1/dns/namecheap/domains: one domain of the Namecheap account. */
+export type AccountDomain = {
+  name: string
+  expiresAt?: string
+  expired: boolean
+  autoRenew: boolean
+  locked: boolean
+  usesNamecheapDns: boolean
+  alreadyAdded: boolean
+}
+
+export type ImportResult = { added: string[]; updated: string[]; skipped: string[] }

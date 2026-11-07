@@ -13,8 +13,10 @@ import { api } from "@/lib/api"
 import { when } from "@/lib/format"
 import type { ServerItem } from "@/lib/types"
 import { bodyOf, formOf, localErrors, ServerFields, serverErrors, type ServerFormValue } from "../../server-form"
+import { ServerHealthPill } from "../../server-health-pill"
 import { ConnectionPill, ExpiryPill } from "../../server-pills"
 import { ConnectionCard } from "./connection-card"
+import { ServerHealthCard } from "./health-card"
 
 /** One server: details, SSH connection and (later jobs) health, identity and MTA. */
 export function ServerDetailView() {
@@ -75,6 +77,7 @@ export function ServerDetailView() {
       <div className="page-head">
         <h1>{s.name}</h1>
         <ConnectionPill status={s.connectionStatus} />
+        <ServerHealthPill status={s.healthStatus} />
         <div className="actions">
           {can("SERVERS:EDIT") && <button className="btn" onClick={() => { setErrors({}); setEditing(formOf(s)) }}><Pencil />Edit</button>}
           {can("SERVERS:DELETE") && <button className="btn text-danger" onClick={() => setRemoving(true)}><Trash2 />Delete</button>}
@@ -98,6 +101,7 @@ export function ServerDetailView() {
         </div>
         <ConnectionCard server={s} onChange={setServer} />
       </div>
+      <ServerHealthCard server={s} onChecked={load} />
       <ModalForm open={!!editing} onClose={() => setEditing(null)} onSubmit={save} title={`Edit ${s.name}`} size="wide"
         icon={<Pencil />} submitLabel="Save"
         text="A new IP or SSH port forgets the trusted host key: connect again afterwards.">

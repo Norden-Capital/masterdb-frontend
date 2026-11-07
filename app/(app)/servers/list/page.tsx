@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus, Search, Server, Trash2 } from "lucide-react"
+import { Plus, RefreshCw, Search, Server, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
@@ -14,6 +14,7 @@ import { api, describe } from "@/lib/api"
 import { when } from "@/lib/format"
 import { count } from "@/lib/table"
 import type { ServerItem } from "@/lib/types"
+import { ServerHealthPill } from "../server-health-pill"
 import { ConnectionPill, ExpiryPill } from "../server-pills"
 
 /** Server management job 1: every VPS with search, filters, expiry warning and delete. */
@@ -22,7 +23,7 @@ export default function ServerListPage() {
   const toast = useToast()
   const t = useTableQuery<ServerItem>({
     path: "/api/v1/servers", enabled: can("SERVERS:VIEW"), sort: { field: "name", dir: "asc" },
-    filters: { connection: "", expiry: "" },
+    filters: { connection: "", expiry: "", health: "" },
   })
   const [confirm, setConfirm] = useState<ServerItem[] | null>(null)
 
@@ -44,6 +45,20 @@ export default function ServerListPage() {
     t.reload()
   }
 
+  async function recheck(list: ServerItem[]) {
+    let bad = 0
+    for (const s of list) {
+      try {
+        const r = await api<{ status?: string }>(`/api/v1/servers/${s.publicId}/health/check`, { method: "POST" })
+        if (r.status !== "OK") bad++
+      } catch (e) {
+        toast(`${s.name}: ${describe(e)}`, "bad")
+      }
+    }
+    toast(`${list.length} server${list.length === 1 ? "" : "s"} re-checked${bad ? `, ${bad} not all good` : ""}`, bad ? "bad" : undefined)
+    t.reload()
+  }
+
   const columns: Column<ServerItem>[] = [
     {
       key: "name", header: "Server", sortField: "name",
@@ -51,6 +66,10 @@ export default function ServerListPage() {
     },
     { key: "ip", header: "Address", sortField: "ip", render: (s) => <span className="mono">{s.ip}{s.sshPort === 22 ? "" : `:${s.sshPort}`}</span> },
     { key: "connection", header: "SSH", sortField: "connectionStatus", render: (s) => <ConnectionPill status={s.connectionStatus} /> },
+    {
+      key: "health", header: "Health", sortField: "healthStatus", className: "cell2",
+      render: (s) => <><ServerHealthPill status={s.healthStatus} />{s.healthCheckedAt && <span>{when(s.healthCheckedAt)}</span>}</>,
+    },
     { key: "expires", header: "Plan ends", sortField: "expiresOn", render: (s) => <ExpiryPill server={s} /> },
     { key: "domain", header: "Domain", render: (s) => s.domain ? <span className="mono">{s.domain.name}</span> : <span className="muted">—</span> },
     { key: "os", header: "OS", render: (s) => s.os ?? <span className="muted">—</span> },
@@ -78,6 +97,15 @@ export default function ServerListPage() {
           <option value="UNREACHABLE">SSH: Unreachable</option>
           <option value="NEW">SSH: Not connected</option>
         </select>
+        <select className={`filter ${f.health ? "on" : ""}`} aria-label="Health" value={f.health ?? ""}
+          onChange={(e) => t.setFilter("health", e.target.value)}>
+          <option value="">Health: All</option>
+          <option value="OK">Health: All good</option>
+          <option value="PROBLEM">Health: Problems</option>
+          <option value="WARNING">Health: Warnings</option>
+          <option value="ERROR">Health: Couldn&apos;t check</option>
+          <option value="UNCHECKED">Health: Never checked</option>
+        </select>
         <select className={`filter ${f.expiry ? "on" : ""}`} aria-label="Plan ends" value={f.expiry ?? ""}
           onChange={(e) => t.setFilter("expiry", e.target.value)}>
           <option value="">Plan ends: All</option>
@@ -92,7 +120,7 @@ export default function ServerListPage() {
         columns={columns}
         rowKey={(s) => s.publicId}
         rowLabel={(s) => s.name}
-        selectable={can("SERVERS:DELETE") ? () => true : undefined}
+        selectable={can("SERVERS:DELETE") || can("SERVERS:RUN") ? () => true : undefined}
         search={{ placeholder: "Search name or IP", label: "Search servers" }}
         errorTitle="Couldn't load servers"
         empty={(d) => {
@@ -106,6 +134,7 @@ export default function ServerListPage() {
         }}
         bulkActions={(chosen) => (
           <>
+            {can("SERVERS:RUN") && <button className="btn" onClick={() => recheck(chosen)}><RefreshCw />Re-check health</button>}
             {can("SERVERS:DELETE") && <button className="btn text-danger" onClick={() => setConfirm(chosen)}><Trash2 />Delete</button>}
           </>
         )}

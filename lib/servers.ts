@@ -37,3 +37,12 @@ export function validUser(v: string): boolean {
 export function validIpv4(v: string): boolean {
   return /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/.test(v.trim())
 }
+
+/** What each health check is, for people. */
+export const CHECK_LABELS: Record<string, string> = {
+  SSH: "SSH login",
+  PORT25: "Port 25 out",
+  PTR: "Reverse DNS (PTR)",
+  DNSBL: "Blocklists",
+  EXPIRY: "VPS plan",
+}

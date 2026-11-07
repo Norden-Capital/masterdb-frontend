@@ -204,9 +204,24 @@ export type ServerItem = {
   presentedKey?: KeyView
   os?: string
   privileged?: boolean
+  /** Absent = never checked. */
+  healthStatus?: ServerHealthStatus
+  healthCheckedAt?: string
   createdAt: string
   updatedAt: string
 }
+
+export type ServerHealthStatus = "OK" | "WARNING" | "PROBLEM" | "ERROR"
+
+export type ServerCheck = {
+  check: "SSH" | "PORT25" | "PTR" | "DNSBL" | "EXPIRY"
+  status: ServerHealthStatus | "NOT_CHECKED"
+  detail: string
+  found?: string
+}
+
+/** GET /api/v1/servers/{id}/health; `checks` empty = never checked. */
+export type ServerHealthReport = { serverId: string; status?: ServerHealthStatus; checkedAt?: string; checks: ServerCheck[] }
 
 /** GET /api/v1/servers/ssh-key: MasterDB's public key (the private key never leaves the backend). */
 export type SshPublicKey = { publicKey: string; fingerprint: string; installCommand: string; createdAt: string }

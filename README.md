@@ -48,8 +48,8 @@ npm run build
   | DNS: Domain list | `/dns/domains` |
   | DNS: one domain (health, managed records, before/after, snapshots) | `/dns/domains/[id]` |
   | Servers: Add VPS server (MasterDB's SSH public key + copy-paste command, then the form) | `/servers/add` |
-  | Servers: Server list (search, SSH and expiry filters, 14-day expiry warning, delete) | `/servers/list` |
-  | Servers: one server (details, edit, Connect → check fingerprint once → Trust; changed key = blocked, Owner accepts) | `/servers/list/[id]` |
+  | Servers: Server list (search, SSH / health / expiry filters, 14-day expiry warning, bulk re-check, delete) | `/servers/list` |
+  | Servers: one server (details, edit, Connect → check fingerprint once → Trust; changed key = blocked, Owner accepts; health per check with Re-check) | `/servers/list/[id]` |
 
 - **Session**: `components/md/session.tsx` loads `/api/v1/auth/me` (user + effective
   permissions). `can("USERS:EDIT")` hides menu items and buttons; the API checks again. Any

@@ -66,7 +66,8 @@ export function ConnectionCard({ server, onChange }: { server: ServerItem; onCha
             <p>The server answered with this {s.presentedKey!.type} key:</p>
             <p className="mono" style={{ wordBreak: "break-all", fontWeight: 600 }}>{s.presentedKey!.fingerprint}</p>
             <p>To be sure it is your VPS, compare it on the VPS console with
-              <span className="mono"> ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub</span>. Once trusted, MasterDB
+              <span className="mono"> for f in /etc/ssh/ssh_host_*_key.pub; do ssh-keygen -lf $f; done</span> (the
+              line ending in ({keyLabel(s.presentedKey!.type)}). Once trusted, MasterDB
               only ever talks to this key and never asks again.</p>
             {can("SERVERS:CREATE") ? (
               <button className="btn primary" style={{ marginTop: 8 }} disabled={busy}
@@ -119,4 +120,9 @@ export function ConnectionCard({ server, onChange }: { server: ServerItem; onCha
       </ConfirmDialog>
     </div>
   )
+}
+
+/** The type as ssh-keygen -l prints it at the end of the line: ECDSA, ED25519 or RSA. */
+function keyLabel(type: string): string {
+  return type.includes("ecdsa") ? "ECDSA" : type.includes("ed25519") ? "ED25519" : type.includes("rsa") ? "RSA" : type
 }

@@ -51,6 +51,8 @@ npm run build
   | Servers: Server list (search, SSH / health / expiry filters, 14-day expiry warning, bulk re-check, delete) | `/servers/list` |
   | Servers: one server (details, edit, Connect → check fingerprint once → Trust; changed key = blocked, Owner accepts; health per check with Re-check; linked domain and HELO / MAIL FROM) | `/servers/list/[id]` |
   | MTA: Install MTA (choose a ready server, optional webmail, live steps / progress ring / scrubbed output, then the DNS preview → write card) | `/mta/install?server=&job=` |
+  | MTA: MTA list (service states, versions, queue size, when read; refresh, remove from list) | `/mta/list` |
+  | MTA: MTA manager (start / stop / restart / reset per service or all, stop and restart confirmed; mail queue and flush; recent logs) | `/mta/manager?server=` |
 
 - **Session**: `components/md/session.tsx` loads `/api/v1/auth/me` (user + effective
   permissions). `can("USERS:EDIT")` hides menu items and buttons; the API checks again. Any

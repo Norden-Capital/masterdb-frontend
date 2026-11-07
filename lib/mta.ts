@@ -34,3 +34,11 @@ export function installStatus(s: InstallStatus) {
 export function dkimRecord(publicKey: string): string {
   return `v=DKIM1; k=rsa; p=${publicKey}`
 }
+
+/** A systemd state as a pill tone: green only when active. */
+export function serviceTone(state: string): "green" | "red" | "amber" | "grey" {
+  if (state === "active") return "green"
+  if (state === "failed" || state === "inactive") return "red"
+  if (state === "activating" || state === "deactivating" || state === "reloading") return "amber"
+  return "grey"
+}

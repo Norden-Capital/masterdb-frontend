@@ -55,7 +55,7 @@ export function InstallView() {
     <div className="page">
       <div className="page-head">
         <h1>Install MTA</h1>
-        <div className="actions">{can("SERVERS:VIEW") && <Link className="btn" href="/servers/list">Server list</Link>}</div>
+        <div className="actions">{can("MTA:VIEW") && <Link className="btn" href="/mta/list">MTA list</Link>}</div>
       </div>
       {error ? <ErrorState title="Couldn't load the servers" error={error} onRetry={load} /> : null}
       {!list && !error && <LoadingState />}

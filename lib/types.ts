@@ -281,3 +281,26 @@ export type MtaCandidate = {
   lastInstallId?: string
   lastInstallStatus?: InstallStatus
 }
+
+export type MtaServiceState = { name: "postfix" | "dovecot" | "opendkim"; state: string }
+
+/** GET /api/v1/mta/servers (one row): a server's MTA with the last status read over SSH. */
+export type MtaItem = {
+  serverId: string
+  name: string
+  ip: string
+  domain?: string
+  heloHost?: string
+  installedAt: string
+  webmail: boolean
+  status?: { services: MtaServiceState[]; versions: Record<string, string>; queue?: number }
+  checkedAt?: string
+  message?: string
+  connectionStatus: ConnectionStatus
+}
+
+export type MtaLogView = { source: string; lines: number; text: string; readAt: string }
+
+export type MtaQueueEntry = { queueId: string; queue: string; arrivedAt?: string; size: number; sender: string; recipients: number; reason?: string }
+
+export type MtaQueue = { count: number; entries: MtaQueueEntry[]; readAt: string }

@@ -23,3 +23,14 @@ describe("install status", () => {
     assert.equal(dkimRecord("MIIB"), "v=DKIM1; k=rsa; p=MIIB")
   })
 })
+
+describe("service states", () => {
+  it("is green only when active", async () => {
+    const { serviceTone } = await import("./mta.ts")
+    assert.equal(serviceTone("active"), "green")
+    assert.equal(serviceTone("failed"), "red")
+    assert.equal(serviceTone("inactive"), "red")
+    assert.equal(serviceTone("activating"), "amber")
+    assert.equal(serviceTone("unknown"), "grey")
+  })
+})

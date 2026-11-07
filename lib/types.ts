@@ -304,3 +304,41 @@ export type MtaLogView = { source: string; lines: number; text: string; readAt: 
 export type MtaQueueEntry = { queueId: string; queue: string; arrivedAt?: string; size: number; sender: string; recipients: number; reason?: string }
 
 export type MtaQueue = { count: number; entries: MtaQueueEntry[]; readAt: string }
+
+// ---- Validation ---------------------------------------------------------------
+
+/** The 6 categories, in the fixed display order. */
+export type Category = "VALID" | "BOUNCE" | "SOFT_BOUNCE" | "REJECT" | "CATCH_ALL" | "UNKNOWN"
+
+/** A server as the validation pages see it (GET /api/v1/validation/servers). */
+export type ValidationServer = {
+  publicId: string
+  name: string
+  ip: string
+  domain?: string
+  heloHost?: string
+  mailFrom?: string
+  healthStatus?: string
+  ready: boolean
+  reason?: string
+}
+
+/** One single check (POST/GET /api/v1/validation/checks). */
+export type CheckResult = {
+  publicId: string
+  email: string
+  serverId?: string
+  serverName: string
+  serverIp: string
+  heloHost: string
+  mailFrom: string
+  category: Category
+  smtpCode: number
+  mxHost: string
+  reason: string
+  reply: string
+  transcript: string[]
+  durationMs: number
+  checkedBy?: string
+  createdAt: string
+}

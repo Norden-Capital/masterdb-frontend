@@ -1,14 +1,14 @@
 "use client"
 
 import {
-  Ban, Contact, DatabaseBackup, Filter, LayoutDashboard, ScrollText, Server, Settings, ShieldCheck, Users,
+  Ban, Contact, DatabaseBackup, Filter, Globe, LayoutDashboard, Mails, ScrollText, Server, Settings, ShieldCheck, Users,
 } from "lucide-react"
 import { useEffect, useRef } from "react"
 
 import type { Catalogue } from "@/lib/types"
 
 const ICONS: Record<string, React.ComponentType> = {
-  DASHBOARD: LayoutDashboard, CONTACTS: Contact, VALIDATION: ShieldCheck, VALIDATION_SERVERS: Server, SEGMENTS: Filter, SUPPRESSION: Ban,
+  DASHBOARD: LayoutDashboard, CONTACTS: Contact, VALIDATION: ShieldCheck, SERVERS: Server, MTA: Mails, DNS: Globe, SEGMENTS: Filter, SUPPRESSION: Ban,
   USERS: Users, ACTIVITY_LOG: ScrollText, BACKUPS: DatabaseBackup, SETTINGS: Settings,
 }
 

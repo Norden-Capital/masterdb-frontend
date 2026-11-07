@@ -176,3 +176,40 @@ export type RecordHealth = {
 
 /** GET /api/v1/dns/domains/{id}/health; `records` empty = never checked. */
 export type HealthReport = { domain: string; status?: HealthStatus; checkedAt?: string; records: RecordHealth[] }
+
+// ---- Server management ----------------------------------------------------------
+
+export type ConnectionStatus = "NEW" | "KEY_PENDING" | "CONNECTED" | "AUTH_FAILED" | "UNREACHABLE" | "KEY_CHANGED"
+
+/** A host key: the trusted one (`at` = when pinned) or one the server showed (`at` = when seen). */
+export type KeyView = { type: string; fingerprint: string; at?: string }
+
+/** GET /api/v1/servers (one row) and /api/v1/servers/{id}. */
+export type ServerItem = {
+  publicId: string
+  name: string
+  ip: string
+  sshPort: number
+  sshUser: string
+  /** YYYY-MM-DD. */
+  expiresOn: string
+  /** Days from today (UTC) to expiresOn; negative when past. */
+  daysLeft: number
+  notes?: string
+  domain?: { publicId: string; name: string }
+  connectionStatus: ConnectionStatus
+  connectionMessage?: string
+  connectionCheckedAt?: string
+  hostKey?: KeyView
+  presentedKey?: KeyView
+  os?: string
+  privileged?: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+/** GET /api/v1/servers/ssh-key: MasterDB's public key (the private key never leaves the backend). */
+export type SshPublicKey = { publicKey: string; fingerprint: string; installCommand: string; createdAt: string }
+
+/** POST /api/v1/servers/{id}/connect, /host-key/trust, /host-key/replace. */
+export type ConnectResult = { outcome: ConnectionStatus; message?: string; server: ServerItem }

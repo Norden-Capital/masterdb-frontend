@@ -2,7 +2,8 @@
 
 import {
   Ban, ChevronDown, CircleHelp, Contact, DatabaseBackup, Filter, Globe, KeyRound, LayoutDashboard, List, LockKeyhole,
-  LogOut, Menu, PanelLeftClose, PanelLeftOpen, Plus, ScrollText, Server, Settings, ShieldCheck, UserRound, Users, X,
+  LogOut, Mails, Menu, PackagePlus, PanelLeftClose, PanelLeftOpen, Plus, ScrollText, Server, ServerCog, Settings, ShieldCheck,
+  UserRound, Users, X,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -26,13 +27,18 @@ const NAV: NavItem[] = [
   { key: "contacts", label: "Contacts", icon: Contact, perm: "CONTACTS:VIEW", soon: true },
   { key: "lists", label: "Lists", icon: List, perm: "CONTACTS:VIEW", soon: true },
   { key: "validation", label: "Validation", icon: ShieldCheck, perm: "VALIDATION:VIEW", soon: true },
-  { key: "servers", label: "Validation servers", icon: Server, perm: "VALIDATION_SERVERS:VIEW", soon: true },
   { key: "segments", label: "Segments & exports", icon: Filter, perm: "SEGMENTS:VIEW", soon: true },
   { key: "suppression", label: "Suppression", icon: Ban, perm: "SUPPRESSION:VIEW", soon: true },
   { grp: "DNS management" },
   { key: "namecheap", label: "Namecheap account", icon: KeyRound, href: "/dns/namecheap", perm: "DNS:VIEW" },
   { key: "add-domain", label: "Add domain", icon: Plus, href: "/dns/add-domain", perm: "DNS:CREATE" },
   { key: "domains", label: "Domain list", icon: Globe, href: "/dns/domains", perm: "DNS:VIEW" },
+  { grp: "Server management" },
+  { key: "add-server", label: "Add VPS server", icon: Plus, href: "/servers/add", perm: "SERVERS:CREATE" },
+  { key: "servers", label: "Server list", icon: Server, href: "/servers/list", perm: "SERVERS:VIEW" },
+  { key: "mta-install", label: "Install MTA", icon: PackagePlus, perm: "MTA:CREATE", soon: true },
+  { key: "mta-list", label: "MTA list", icon: Mails, perm: "MTA:VIEW", soon: true },
+  { key: "mta-manager", label: "MTA manager", icon: ServerCog, perm: "MTA:VIEW", soon: true },
   { grp: "Admin" },
   { key: "users", label: "Users & permissions", icon: Users, href: "/users", perm: "USERS:VIEW" },
   { key: "activity", label: "Activity log", icon: ScrollText, href: "/activity", perm: "ACTIVITY_LOG:VIEW" },
@@ -46,6 +52,8 @@ const TITLES: (readonly [string, string])[] = [
   ["/dns/namecheap", "Namecheap account"],
   ["/dns/add-domain", "Add domain"],
   ["/dns/domains", "Domains"],
+  ["/servers/add", "Add VPS server"],
+  ["/servers/list", "Servers"],
   ["/users", "Users & permissions"],
   ["/activity", "Activity log"],
   ["/account", "My account"],

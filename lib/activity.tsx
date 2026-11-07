@@ -1,5 +1,5 @@
 import {
-  CircleAlert, CircleSlash, CloudDownload, Download, Globe, Trash2, KeyRound, PlugZap, LockKeyhole, LogIn, LogOut, Mail, MailCheck, MailX, RotateCcw,
+  CircleAlert, CircleSlash, CloudDownload, Download, Globe, History, Trash2, Upload, KeyRound, PlugZap, LockKeyhole, LogIn, LogOut, Mail, MailCheck, MailX, RotateCcw,
   Send, ShieldCheck, SlidersHorizontal, UserPlus,
 } from "lucide-react"
 
@@ -36,6 +36,9 @@ export const ACTIONS: Record<string, Meta> = {
   DOMAIN_ADDED: { label: "Added a domain", icon: Globe },
   DOMAINS_IMPORTED: { label: "Imported domains from Namecheap", icon: CloudDownload },
   DOMAIN_DELETED: { label: "Deleted a domain", icon: Trash2 },
+  DNS_SETTINGS_CHANGED: { label: "Changed managed DNS records", icon: SlidersHorizontal },
+  DNS_RECORDS_WRITTEN: { label: "Wrote DNS records", icon: Upload },
+  DNS_RECORDS_RESTORED: { label: "Restored DNS records", icon: History },
 }
 
 export function actionMeta(action: string): Meta {
@@ -85,6 +88,11 @@ function dnsDetail(action: string, d: Record<string, unknown>): string | null {
       return d.source === "NAMECHEAP" ? "Was from Namecheap" : "Was added by hand"
     case "DOMAINS_IMPORTED":
       return `${Number(d.addedCount ?? 0)} added, ${Number(d.updatedCount ?? 0)} refreshed`
+    case "DNS_SETTINGS_CHANGED":
+      return `IP ${String(d.mailIp || "not set")} · DKIM ${d.dkimKey ? "key set" : "no key"} · DMARC ${String(d.dmarcPolicy ?? "")}`
+    case "DNS_RECORDS_WRITTEN":
+    case "DNS_RECORDS_RESTORED":
+      return `+${Number(d.added ?? 0)} −${Number(d.removed ?? 0)} · ${d.verified ? "verified" : "not verified"}`
     default:
       return null
   }

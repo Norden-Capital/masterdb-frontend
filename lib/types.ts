@@ -126,3 +126,42 @@ export type AccountDomain = {
 }
 
 export type ImportResult = { added: string[]; updated: string[]; skipped: string[] }
+
+/** The records MasterDB manages for a domain (A, MX, SPF, DKIM, DMARC, BIMI) and what health checks expect. */
+export type DnsSettings = {
+  mailIp?: string
+  dkimSelector: string
+  dkimPublicKey?: string
+  dmarcPolicy: "none" | "quarantine" | "reject"
+  bimiLogoUrl?: string
+  bimiCertificateUrl?: string
+  updatedAt?: string
+}
+
+/** One host record as Namecheap has it. */
+export type HostRecord = { name: string; type: string; address: string; mxPref?: string; ttl: string }
+
+export type RecordChange = { change: "ADD" | "REMOVE" | "KEEP"; managed: boolean; record: HostRecord }
+
+/** Before/after of a write to Namecheap (setup or restore). `token` must be sent back to write. */
+export type RecordPlan = {
+  domain: string
+  emailType: string
+  token: string
+  changes: RecordChange[]
+  before: HostRecord[]
+  after: HostRecord[]
+  warnings: string[]
+}
+
+export type WriteResult = { verified: boolean; missing: HostRecord[]; snapshotId: string }
+
+export type DnsSnapshot = {
+  publicId: string
+  createdAt: string
+  actorLabel?: string
+  reason: "BEFORE_SETUP" | "BEFORE_RESTORE"
+  emailType: string
+  recordCount: number
+  records?: HostRecord[]
+}

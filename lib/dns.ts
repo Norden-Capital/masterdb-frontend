@@ -37,3 +37,23 @@ export function expiryInfo(d: { expiresAt?: string; expired?: boolean }, today: 
 export function importable<T extends { name: string; alreadyAdded: boolean }>(list: readonly T[]): string[] {
   return list.filter((d) => !d.alreadyAdded).map((d) => d.name)
 }
+
+/** "@ MX 10 mail.example.com." — one line for a record. */
+export function recordLine(r: { name: string; type: string; address: string; mxPref?: string }): string {
+  return [r.name, r.type, r.type === "MX" && r.mxPref ? r.mxPref : null, r.address].filter(Boolean).join(" ")
+}
+
+/** Counts for the diff summary. */
+export function changeCounts(changes: readonly { change: "ADD" | "REMOVE" | "KEEP" }[]) {
+  return {
+    add: changes.filter((c) => c.change === "ADD").length,
+    remove: changes.filter((c) => c.change === "REMOVE").length,
+    keep: changes.filter((c) => c.change === "KEEP").length,
+  }
+}
+
+/** A pasted DKIM key: the bare base64, from either the key itself or a whole "v=DKIM1; k=rsa; p=..." record. */
+export function dkimKey(input: string): string {
+  const m = /(?:^|;)\s*p=([^;]*)/i.exec(input)
+  return (m ? m[1] : input).replace(/["\s]/g, "")
+}

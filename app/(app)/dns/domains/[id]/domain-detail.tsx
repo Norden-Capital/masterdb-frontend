@@ -13,6 +13,8 @@ import { api } from "@/lib/api"
 import { expiryInfo } from "@/lib/dns"
 import { when } from "@/lib/format"
 import type { DomainItem } from "@/lib/types"
+import { DnsSettingsCard } from "./dns-settings-card"
+import { RecordsCard } from "./records-card"
 
 /** One domain: Namecheap metadata, and (jobs 3–4) its records and DNS health. */
 export function DomainDetailView() {
@@ -23,6 +25,7 @@ export function DomainDetailView() {
   const [domain, setDomain] = useState<DomainItem | null>(null)
   const [error, setError] = useState<unknown>(null)
   const [removing, setRemoving] = useState(false)
+  const [settingsVersion, setSettingsVersion] = useState(0)
   const today = useMemo(() => new Date(), [])
 
   const load = useCallback(() => {
@@ -71,6 +74,10 @@ export function DomainDetailView() {
             <div><dt>Added</dt><dd>{when(domain.createdAt)}</dd></div>
           </dl>
         </div>
+      </div>
+      <div className="grid-2" style={{ alignItems: "start", marginTop: 16 }}>
+        <DnsSettingsCard domain={domain} onSaved={() => setSettingsVersion((v) => v + 1)} />
+        <RecordsCard domain={domain} settingsVersion={settingsVersion} />
       </div>
       <ConfirmDialog open={removing} onClose={() => setRemoving(false)} danger icon={<Trash2 />}
         title={`Delete ${domain.name}?`}

@@ -42,3 +42,22 @@ describe("importable", () => {
     assert.deepEqual(importable([{ name: "a.com", alreadyAdded: true }, { name: "b.com", alreadyAdded: false }]), ["b.com"])
   })
 })
+
+import { changeCounts, dkimKey, recordLine } from "./dns.ts"
+
+describe("records", () => {
+  it("prints a record on one line", () => {
+    assert.equal(recordLine({ name: "@", type: "MX", address: "mail.example.com.", mxPref: "10" }), "@ MX 10 mail.example.com.")
+    assert.equal(recordLine({ name: "_dmarc", type: "TXT", address: "v=DMARC1; p=quarantine", mxPref: "10" }), "_dmarc TXT v=DMARC1; p=quarantine")
+  })
+
+  it("counts changes", () => {
+    assert.deepEqual(changeCounts([{ change: "ADD" }, { change: "KEEP" }, { change: "KEEP" }, { change: "REMOVE" }]),
+      { add: 1, remove: 1, keep: 2 })
+  })
+
+  it("takes the key out of a pasted DKIM record", () => {
+    assert.equal(dkimKey('"v=DKIM1; k=rsa; p=MIIB IjAN\nBgkq"'), "MIIBIjANBgkq")
+    assert.equal(dkimKey(" MIIBIjANBgkq "), "MIIBIjANBgkq")
+  })
+})

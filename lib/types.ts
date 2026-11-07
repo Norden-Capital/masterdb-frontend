@@ -233,3 +233,51 @@ export type SshPublicKey = { publicKey: string; fingerprint: string; installComm
 
 /** POST /api/v1/servers/{id}/connect, /host-key/trust, /host-key/replace. */
 export type ConnectResult = { outcome: ConnectionStatus; message?: string; server: ServerItem }
+
+// ---- MTA ---------------------------------------------------------------------------
+
+export type InstallStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "INTERRUPTED"
+
+export type InstallStep = { key: string; label: string; state: "DONE" | "RUNNING" | "FAILED" | "PENDING" }
+
+/** GET /api/v1/mta/installs/{id}?logFrom=n: `log` is the part from `logFrom`; `logLength` is the next logFrom. */
+export type MtaInstall = {
+  publicId: string
+  serverId: string
+  serverName?: string
+  domain: string
+  domainId?: string
+  heloHost: string
+  webmail: boolean
+  webmailLogin?: string
+  status: InstallStatus
+  stepsDone: number
+  stepsTotal: number
+  currentStep?: string
+  error?: string
+  steps: InstallStep[]
+  log: string
+  logLength: number
+  logFrom: number
+  dkimSelector: string
+  dkimPublicKey?: string
+  startedBy?: string
+  createdAt: string
+  startedAt?: string
+  finishedAt?: string
+}
+
+/** GET /api/v1/mta/candidates: can this server get an MTA now, and if not, why. */
+export type MtaCandidate = {
+  publicId: string
+  name: string
+  ip: string
+  os?: string
+  domain?: string
+  heloHost?: string
+  ready: boolean
+  reason?: string
+  mtaInstalledAt?: string
+  lastInstallId?: string
+  lastInstallStatus?: InstallStatus
+}

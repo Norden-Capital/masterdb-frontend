@@ -1,8 +1,8 @@
 "use client"
 
 import {
-  Ban, ChevronDown, CircleHelp, Contact, DatabaseBackup, Filter, LayoutDashboard, List, LockKeyhole, LogOut, Menu,
-  PanelLeftClose, PanelLeftOpen, ScrollText, Server, Settings, ShieldCheck, UserRound, Users, X,
+  Ban, ChevronDown, CircleHelp, Contact, DatabaseBackup, Filter, Globe, KeyRound, LayoutDashboard, List, LockKeyhole,
+  LogOut, Menu, PanelLeftClose, PanelLeftOpen, Plus, ScrollText, Server, Settings, ShieldCheck, UserRound, Users, X,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -29,6 +29,10 @@ const NAV: NavItem[] = [
   { key: "servers", label: "Validation servers", icon: Server, perm: "VALIDATION_SERVERS:VIEW", soon: true },
   { key: "segments", label: "Segments & exports", icon: Filter, perm: "SEGMENTS:VIEW", soon: true },
   { key: "suppression", label: "Suppression", icon: Ban, perm: "SUPPRESSION:VIEW", soon: true },
+  { grp: "DNS management" },
+  { key: "namecheap", label: "Namecheap account", icon: KeyRound, href: "/dns/namecheap", perm: "DNS:VIEW" },
+  { key: "add-domain", label: "Add domain", icon: Plus, perm: "DNS:CREATE", soon: true },
+  { key: "domains", label: "Domain list", icon: Globe, perm: "DNS:VIEW", soon: true },
   { grp: "Admin" },
   { key: "users", label: "Users & permissions", icon: Users, href: "/users", perm: "USERS:VIEW" },
   { key: "activity", label: "Activity log", icon: ScrollText, href: "/activity", perm: "ACTIVITY_LOG:VIEW" },
@@ -39,6 +43,7 @@ const NAV: NavItem[] = [
 ]
 
 const TITLES: (readonly [string, string])[] = [
+  ["/dns/namecheap", "Namecheap account"],
   ["/users", "Users & permissions"],
   ["/activity", "Activity log"],
   ["/account", "My account"],

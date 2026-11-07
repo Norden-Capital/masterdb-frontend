@@ -75,3 +75,18 @@ export type DashboardSummary = {
   openSessions: number
   activity: { last24Hours: number; last7Days: number }
 }
+
+/** GET /api/v1/dns/namecheap/account. The API key is never sent back, only `apiKeySet`. */
+export type NamecheapAccount = {
+  configured: boolean
+  apiUser?: string
+  username?: string
+  apiKeySet: boolean
+  /** The IP this server sends as ClientIp; it must be whitelisted in Namecheap. */
+  clientIp: string
+  createdAt?: string
+  updatedAt?: string
+  lastTest?: { at: string; ok: boolean; message: string }
+}
+
+export type NamecheapTestResult = { ok: boolean; code?: string; message: string; domainCount?: number }

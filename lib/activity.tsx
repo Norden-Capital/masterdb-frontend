@@ -1,5 +1,5 @@
 import {
-  CircleAlert, CircleSlash, Download, KeyRound, LockKeyhole, LogIn, LogOut, Mail, MailCheck, MailX, RotateCcw,
+  CircleAlert, CircleSlash, Download, Globe, KeyRound, PlugZap, LockKeyhole, LogIn, LogOut, Mail, MailCheck, MailX, RotateCcw,
   Send, ShieldCheck, SlidersHorizontal, UserPlus,
 } from "lucide-react"
 
@@ -30,6 +30,9 @@ export const ACTIONS: Record<string, Meta> = {
   SESSION_REVOKED: { label: "Ended a session", icon: LogOut },
   SESSIONS_REVOKED: { label: "Ended sessions", icon: LogOut },
   ACTIVITY_EXPORTED: { label: "Exported the activity log", icon: Download },
+  NAMECHEAP_ACCOUNT_SAVED: { label: "Saved the Namecheap account", icon: Globe },
+  NAMECHEAP_ACCOUNT_REMOVED: { label: "Removed the Namecheap account", icon: Globe },
+  NAMECHEAP_CONNECTION_TESTED: { label: "Tested the Namecheap connection", icon: PlugZap },
 }
 
 export function actionMeta(action: string): Meta {
@@ -50,6 +53,8 @@ const REASONS: Record<string, string> = {
 /** The short second line under the target (mock 12 "Target" column). */
 export function detailLine(e: ActivityEntry): string {
   const d = e.details ?? {}
+  const dns = dnsDetail(e.action, d)
+  if (dns !== null) return dns
   if (typeof d.reason === "string") return REASONS[d.reason] ?? d.reason
   if (Array.isArray(d.added) || Array.isArray(d.removed)) {
     const add = (d.added as string[] | undefined) ?? []
@@ -62,4 +67,25 @@ export function detailLine(e: ActivityEntry): string {
   if (typeof d.remaining === "number") return `${d.remaining} codes left`
   if (Array.isArray(d.permissions)) return `${d.permissions.length} permissions`
   return ""
+}
+
+/** DNS module entries (backend dns/ package); null for any other action. */
+function dnsDetail(action: string, d: Record<string, unknown>): string | null {
+  switch (action) {
+    case "NAMECHEAP_ACCOUNT_SAVED":
+      return `${d.added ? "Added" : "Changed"} · API user ${String(d.apiUser ?? "")} · key ${d.keyReplaced ? "set" : "kept"}`
+    case "NAMECHEAP_CONNECTION_TESTED":
+      return d.ok ? "Connected" : NAMECHEAP_ERRORS[String(d.code)] ?? "Failed"
+    default:
+      return null
+  }
+}
+
+/** Short names of the Namecheap error codes (backend ErrorCode). */
+export const NAMECHEAP_ERRORS: Record<string, string> = {
+  NAMECHEAP_IP_NOT_WHITELISTED: "IP not whitelisted",
+  NAMECHEAP_INVALID_KEY: "API key or user refused",
+  NAMECHEAP_ERROR: "Namecheap error",
+  NAMECHEAP_UNREACHABLE: "Namecheap not reachable",
+  NAMECHEAP_NOT_CONFIGURED: "No Namecheap account",
 }

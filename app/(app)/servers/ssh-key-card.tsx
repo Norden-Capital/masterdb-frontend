@@ -27,8 +27,9 @@ export function SshKeyCard({ title = "1. Let MasterDB log in" }: { title?: strin
         {!key && !error && <LoadingState lines={2} />}
         {key && (
           <>
-            <p className="muted" style={{ marginTop: 0 }}>MasterDB logs in with its own SSH key, never a password. Run this
-              once on the VPS, as the user MasterDB will log in with (root by default). Running it again changes nothing.</p>
+            <p className="muted" style={{ marginTop: 0 }}>MasterDB logs in with its own SSH key. The easy way: skip this,
+              and type the server&apos;s root password once when you trust the server (step 3 on its page); MasterDB then adds
+              its key itself and never saves the password. Or run this command once on the VPS, as the login user (root by default).</p>
             <div className="field">
               <span className="label">Command for the VPS</span>
               <pre className="mono" style={{ whiteSpace: "pre-wrap", wordBreak: "break-all", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: 12, margin: 0, fontSize: 12 }}>{key.installCommand}</pre>

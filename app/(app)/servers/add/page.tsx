@@ -62,7 +62,7 @@ export default function AddServerPage() {
             {error ? <Banner tone="red" title="Couldn't add the server">{describe(error)}</Banner> : null}
             <ServerFields value={value} onChange={setValue} errors={errors} />
             <button className="btn primary" type="submit" disabled={busy} style={{ marginTop: 16 }}><Plus />Add server</button>
-            <p className="help">Next, on the server&apos;s page: Connect, check the host key fingerprint once, and MasterDB tests its login.</p>
+            <p className="help">Next, on the server&apos;s page: Connect, check the fingerprint once, type the root password if MasterDB&apos;s key isn&apos;t on the server yet, and Trust.</p>
           </form>
         </div>
       </div>

@@ -6,7 +6,7 @@ import { useState } from "react"
 import { ConfirmDialog } from "@/components/md/dialogs"
 import { useSession } from "@/components/md/session"
 import { useToast } from "@/components/md/toast"
-import { Banner } from "@/components/md/ui"
+import { Banner, PasswordField } from "@/components/md/ui"
 import { api, describe } from "@/lib/api"
 import { when } from "@/lib/format"
 import type { ConnectResult, ServerItem } from "@/lib/types"
@@ -24,6 +24,8 @@ export function ConnectionCard({ server, onChange }: { server: ServerItem; onCha
   const [error, setError] = useState<unknown>(null)
   const [last, setLast] = useState<ConnectResult | null>(null)
   const [replacing, setReplacing] = useState(false)
+  // The SSH user's password, only to let MasterDB add its own key once. Never stored; cleared after use.
+  const [password, setPassword] = useState("")
   const base = `/api/v1/servers/${server.publicId}`
 
   async function call(path: string, body?: unknown) {
@@ -70,10 +72,17 @@ export function ConnectionCard({ server, onChange }: { server: ServerItem; onCha
               line ending in ({keyLabel(s.presentedKey!.type)}). Once trusted, MasterDB
               only ever talks to this key and never asks again.</p>
             {can("SERVERS:CREATE") ? (
-              <button className="btn primary" style={{ marginTop: 8 }} disabled={busy}
-                onClick={() => call("/host-key/trust", { fingerprint: s.presentedKey!.fingerprint }).catch(() => undefined)}>
-                <ShieldCheck />Trust this key
-              </button>
+              <form noValidate onSubmit={(e) => {
+                e.preventDefault()
+                call("/host-key/trust", { fingerprint: s.presentedKey!.fingerprint, password: password || null })
+                  .catch(() => undefined).finally(() => setPassword(""))
+              }}>
+                <PasswordField id="ssh-pass" label={`Password of ${s.sshUser} (optional)`} value={password} onChange={setPassword}
+                  autoComplete="off" />
+                <p className="help" style={{ marginTop: -8 }}>If MasterDB&apos;s key isn&apos;t on the server yet, type the password once:
+                  MasterDB logs in with it one time, adds its key, and forgets it. It is never saved.</p>
+                <button type="submit" className="btn primary" disabled={busy}><ShieldCheck />Trust this key</button>
+              </form>
             ) : <p className="muted">Trusting a key needs the Servers create permission.</p>}
           </Banner>
         )}
@@ -97,6 +106,19 @@ export function ConnectionCard({ server, onChange }: { server: ServerItem; onCha
           <Banner tone={s.connectionStatus === "CONNECTED" ? "amber" : "red"} title={s.connectionStatus === "CONNECTED" ? "Connected, with a warning" : "Not connected"}>
             <p>{s.connectionMessage}</p>
           </Banner>
+        )}
+        {s.connectionStatus === "AUTH_FAILED" && s.hostKey && can("SERVERS:CREATE") && (
+          <form noValidate style={{ marginTop: 12 }} onSubmit={(e) => {
+            e.preventDefault()
+            if (password) call("/install-key", { password }).catch(() => undefined).finally(() => setPassword(""))
+          }}>
+            <PasswordField id="ssh-pass-add" label={`Password of ${s.sshUser}`} value={password} onChange={setPassword} autoComplete="off" />
+            <p className="help" style={{ marginTop: -8 }}>MasterDB logs in with it once, adds its own key, and forgets the
+              password. It is never saved. After that, no password is needed.</p>
+            <button type="submit" className="btn primary" disabled={busy || !password}>
+              {busy ? <LoaderCircle className="spin" /> : <KeyRound />}Add MasterDB&apos;s key
+            </button>
+          </form>
         )}
         {last && last.outcome === "CONNECTED" && !s.connectionMessage && (
           <Banner tone="green" title="MasterDB's key logs in">{last.message ? <p>{last.message}</p> : null}</Banner>

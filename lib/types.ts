@@ -67,3 +67,11 @@ export type ActivityEntry = {
   requestId?: string
   details: Record<string, unknown>
 }
+
+/** GET /api/v1/dashboard/summary: counted from the database at the call. */
+export type DashboardSummary = {
+  generatedAt: string
+  users: { total: number; active: number; invited: number; disabled: number }
+  openSessions: number
+  activity: { last24Hours: number; last7Days: number }
+}

@@ -5,6 +5,7 @@ import Link from "next/link"
 
 import { useSession } from "@/components/md/session"
 
+/** Start page for someone without DASHBOARD:VIEW: no numbers, just where to go. */
 export function Welcome() {
   const { me, can } = useSession()
   return (
@@ -12,7 +13,7 @@ export function Welcome() {
       <div className="empty">
         <div className="ic"><LayoutDashboard /></div>
         <h3>Welcome, {me.fullName.split(" ")[0]}</h3>
-        <p>The dashboard and the contact modules come next. For now you can manage your account
+        <p>Your permissions don&apos;t include the dashboard numbers. You can manage your account
           {can("USERS:VIEW") ? ", the team" : ""}{can("ACTIVITY_LOG:VIEW") ? " and the activity log" : ""}.</p>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginTop: 10 }}>
           <Link className="btn" href="/account/security">My security</Link>

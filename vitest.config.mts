@@ -9,7 +9,7 @@ export default defineConfig({
   resolve: { alias: { "@": fileURLToPath(new URL(".", import.meta.url)) } },
   test: {
     environment: "jsdom",
-    include: ["components/**/*.test.tsx"],
+    include: ["components/**/*.test.tsx", "app/**/*.test.tsx"],
     setupFiles: ["./vitest.setup.ts"],
   },
 })

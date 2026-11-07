@@ -1,11 +1,11 @@
 import type { Metadata } from "next"
 
 import { BackendStatus } from "@/components/backend-status"
-import { Welcome } from "./welcome"
+import { Dashboard } from "./dashboard"
 
 export const metadata: Metadata = { title: "Dashboard" }
 
-/** Placeholder until the dashboard (M2.4): who you are and whether the backend answers. */
+/** Start page: real counts from GET /api/v1/dashboard/summary (DASHBOARD:VIEW), else a welcome card. */
 export default function Home() {
   return (
     <div className="page">
@@ -13,7 +13,7 @@ export default function Home() {
         <h1>Dashboard</h1>
         <span className="meta"><BackendStatus /></span>
       </div>
-      <Welcome />
+      <Dashboard />
     </div>
   )
 }

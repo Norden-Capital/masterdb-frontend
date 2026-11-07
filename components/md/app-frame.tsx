@@ -22,7 +22,7 @@ type NavItem = Exclude<NavEntry, { key: string }> | (Extract<NavEntry, { key: st
  */
 const NAV: NavItem[] = [
   { grp: "Workspace" },
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/" },
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/", perm: "DASHBOARD:VIEW" },
   { key: "contacts", label: "Contacts", icon: Contact, perm: "CONTACTS:VIEW", soon: true },
   { key: "lists", label: "Lists", icon: List, perm: "CONTACTS:VIEW", soon: true },
   { key: "validation", label: "Validation", icon: ShieldCheck, perm: "VALIDATION:VIEW", soon: true },

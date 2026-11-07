@@ -389,3 +389,25 @@ select.filter{appearance:none;padding-right:30px;background-image:linear-gradien
   .topbar{gap:10px;padding:0 12px}.logo{font-size:0;gap:0}.tb-title{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}.tb-div{display:none}
   .auth-card{padding:28px 20px}
 }
+
+/* ---------- App shell additions (M2): phone drawer, "soon" tag ---------- */
+.tb-menu{display:none;margin-left:-6px}
+.soon-tag{margin-left:auto;font-size:10px;line-height:14px;letter-spacing:.04em;text-transform:uppercase;font-weight:600;color:var(--subtle-fg);border:1px solid var(--border-strong);border-radius:999px;padding:0 6px}
+.collapsed .soon-tag{display:none}
+.drawer-backdrop{display:none}
+@media (max-width:900px){
+  .nav-collapse{display:none}
+  .soon-tag{display:none}
+}
+@media (max-width:600px){
+  .tb-menu{display:grid}
+  .app.drawer-open .sidebar{display:flex;position:fixed;left:0;top:60px;bottom:0;height:auto;width:min(280px,85vw);z-index:45;overflow-y:auto;box-shadow:var(--shadow-modal)}
+  .app.drawer-open .sidebar .grp{display:block}
+  .app.drawer-open .nav-item{justify-content:flex-start;padding:0 12px}
+  .app.drawer-open .nav-item span{display:inline}
+  .app.drawer-open .nav-item .soon-tag{display:inline-block}
+  .app.drawer-open .drawer-backdrop{display:block;position:fixed;inset:60px 0 0 0;background:var(--overlay);z-index:44}
+  .bulkbar{max-width:calc(100vw - 24px);flex-wrap:wrap;white-space:normal;bottom:16px}
+  .toast-stack{left:12px;right:12px;bottom:12px}
+  .toast{min-width:0}
+}

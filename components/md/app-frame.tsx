@@ -1,8 +1,8 @@
 "use client"
 
 import {
-  Ban, ChevronDown, CircleHelp, Contact, DatabaseBackup, Filter, LayoutDashboard, LockKeyhole, LogOut,
-  PanelLeftClose, PanelLeftOpen, ScrollText, Server, Settings, ShieldCheck, UserRound, Users,
+  Ban, ChevronDown, CircleHelp, Contact, DatabaseBackup, Filter, LayoutDashboard, List, LockKeyhole, LogOut, Menu,
+  PanelLeftClose, PanelLeftOpen, ScrollText, Server, Settings, ShieldCheck, UserRound, Users, X,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -11,20 +11,20 @@ import { useEffect, useRef, useState } from "react"
 import { useSession } from "@/components/md/session"
 import { useTheme } from "@/components/md/theme"
 import { initials } from "@/lib/format"
+import { isActive, type NavEntry, pageTitle, visibleNav } from "@/lib/nav"
 
-type NavItem =
-  | { grp: string }
-  | { spacer: true }
-  | { key: string; label: string; icon: React.ComponentType; href?: string; perm?: string; soon?: boolean }
+type NavItem = Exclude<NavEntry, { key: string }> | (Extract<NavEntry, { key: string }> & { icon: React.ComponentType })
 
 /**
  * The menu (mock app.js NAV). Items the user may not open are hidden; modules
  * that are not built yet are shown greyed as "coming soon", never as fake pages.
+ * Lists have no permission of their own: they belong to Contacts (CONTACTS:VIEW).
  */
 const NAV: NavItem[] = [
   { grp: "Workspace" },
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/" },
-  { key: "contacts", label: "Contacts & lists", icon: Contact, perm: "CONTACTS:VIEW", soon: true },
+  { key: "contacts", label: "Contacts", icon: Contact, perm: "CONTACTS:VIEW", soon: true },
+  { key: "lists", label: "Lists", icon: List, perm: "CONTACTS:VIEW", soon: true },
   { key: "validation", label: "Validation", icon: ShieldCheck, perm: "VALIDATION:VIEW", soon: true },
   { key: "servers", label: "Validation servers", icon: Server, perm: "VALIDATION_SERVERS:VIEW", soon: true },
   { key: "segments", label: "Segments & exports", icon: Filter, perm: "SEGMENTS:VIEW", soon: true },
@@ -38,7 +38,7 @@ const NAV: NavItem[] = [
   { key: "settings", label: "Settings", icon: Settings, perm: "SETTINGS:VIEW", soon: true },
 ]
 
-const TITLES: [string, string][] = [
+const TITLES: (readonly [string, string])[] = [
   ["/users", "Users & permissions"],
   ["/activity", "Activity log"],
   ["/account", "My account"],
@@ -57,6 +57,8 @@ export function AppFrame({ children }: { children: React.ReactNode }) {
     }
   })
   const [menuOpen, setMenuOpen] = useState(false)
+  // Phone width: the sidebar is a drawer over the page, closed by default.
+  const [drawer, setDrawer] = useState(false)
   const [theme, setTheme] = useTheme()
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -74,6 +76,20 @@ export function AppFrame({ children }: { children: React.ReactNode }) {
     }
   }, [menuOpen])
 
+  useEffect(() => {
+    if (!drawer) return
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && setDrawer(false)
+    // Back to a wider window: the drawer has no meaning there.
+    const mq = matchMedia("(min-width: 601px)")
+    const wide = () => mq.matches && setDrawer(false)
+    document.addEventListener("keydown", esc)
+    mq.addEventListener("change", wide)
+    return () => {
+      document.removeEventListener("keydown", esc)
+      mq.removeEventListener("change", wide)
+    }
+  }, [drawer])
+
   const toggle = () => {
     const next = !collapsed
     setCollapsed(next)
@@ -84,14 +100,17 @@ export function AppFrame({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const title = TITLES.find(([p]) => (p === "/" ? pathname === "/" : pathname.startsWith(p)))?.[1] ?? ""
-  // Hide a group heading when nothing under it is visible.
-  const visible = NAV.filter((n) => !("key" in n) || !n.perm || can(n.perm))
-  const items = visible.filter((n, i) => !("grp" in n) || (visible[i + 1] && "key" in visible[i + 1]))
+  const title = pageTitle(pathname, TITLES)
+  const items = visibleNav(NAV, can)
+  const closeDrawer = () => setDrawer(false)
 
   return (
-    <div className={`app ${collapsed ? "collapsed" : ""}`}>
+    <div className={`app ${collapsed ? "collapsed" : ""} ${drawer ? "drawer-open" : ""}`}>
       <header className="topbar">
+        <button className="tb-icon tb-menu" aria-label={drawer ? "Close menu" : "Open menu"} aria-expanded={drawer}
+          aria-controls="md-sidebar" onClick={() => setDrawer(!drawer)}>
+          {drawer ? <X /> : <Menu />}
+        </button>
         <Link className="logo" href="/"><span className="logo-mark">M</span>MasterDB</Link>
         <span className="tb-div" />
         <span className="tb-title">{title}</span>
@@ -125,7 +144,8 @@ export function AppFrame({ children }: { children: React.ReactNode }) {
           )}
         </div>
       </header>
-      <nav className="sidebar" aria-label="Main">
+      {drawer && <div className="drawer-backdrop" onClick={closeDrawer} aria-hidden="true" />}
+      <nav className="sidebar" id="md-sidebar" aria-label="Main">
         {items.map((n, i) => {
           if ("spacer" in n) return <div className="spacer" key={`s${i}`} />
           if ("grp" in n) return <div className="grp" key={n.grp}>{n.grp}</div>
@@ -133,19 +153,19 @@ export function AppFrame({ children }: { children: React.ReactNode }) {
           if (n.soon || !n.href) {
             return (
               <span className="nav-item soon" key={n.key} title={`${n.label}: coming soon`} aria-disabled="true">
-                <Icon /><span>{n.label}</span>
+                <Icon /><span>{n.label}</span><span className="soon-tag">Soon</span>
               </span>
             )
           }
-          const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href)
+          const active = isActive(n.href, pathname)
           return (
             <Link className={`nav-item ${active ? "active" : ""}`} href={n.href} key={n.key} title={n.label}
-              aria-current={active ? "page" : undefined}>
+              aria-current={active ? "page" : undefined} onClick={closeDrawer}>
               <Icon /><span>{n.label}</span>
             </Link>
           )
         })}
-        <button className="nav-item" onClick={toggle} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        <button className="nav-item nav-collapse" onClick={toggle} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           style={{ border: 0, background: "transparent", font: "inherit", cursor: "pointer" }}>
           {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}<span>Collapse</span>
         </button>

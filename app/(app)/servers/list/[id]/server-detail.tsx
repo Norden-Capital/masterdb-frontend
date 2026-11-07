@@ -17,6 +17,7 @@ import { ServerHealthPill } from "../../server-health-pill"
 import { ConnectionPill, ExpiryPill } from "../../server-pills"
 import { ConnectionCard } from "./connection-card"
 import { ServerHealthCard } from "./health-card"
+import { IdentityCard } from "./identity-card"
 
 /** One server: details, SSH connection and (later jobs) health, identity and MTA. */
 export function ServerDetailView() {
@@ -102,6 +103,7 @@ export function ServerDetailView() {
         <ConnectionCard server={s} onChange={setServer} />
       </div>
       <ServerHealthCard server={s} onChecked={load} />
+      <div style={{ marginTop: 16 }}><IdentityCard server={s} onChange={setServer} /></div>
       <ModalForm open={!!editing} onClose={() => setEditing(null)} onSubmit={save} title={`Edit ${s.name}`} size="wide"
         icon={<Pencil />} submitLabel="Save"
         text="A new IP or SSH port forgets the trusted host key: connect again afterwards.">

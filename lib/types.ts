@@ -136,6 +136,8 @@ export type DnsSettings = {
   bimiLogoUrl?: string
   bimiCertificateUrl?: string
   updatedAt?: string
+  /** A linked server (Server management): mailIp is its IP and can't be typed. */
+  mailServer?: { publicId: string; name: string; ip: string }
 }
 
 /** One host record as Namecheap has it. */
@@ -207,6 +209,9 @@ export type ServerItem = {
   /** Absent = never checked. */
   healthStatus?: ServerHealthStatus
   healthCheckedAt?: string
+  /** Probe identity on the linked domain (present only while a domain is linked). */
+  heloHost?: string
+  mailFrom?: string
   createdAt: string
   updatedAt: string
 }

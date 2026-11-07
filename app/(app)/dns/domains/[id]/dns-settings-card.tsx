@@ -1,6 +1,7 @@
 "use client"
 
 import { Pencil } from "lucide-react"
+import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 
 import { ModalForm } from "@/components/md/dialogs"
@@ -41,7 +42,10 @@ export function DnsSettingsCard(props: { domain: DomainItem; onSaved: () => void
         {error ? <ErrorState title="Couldn't load the settings" error={error} onRetry={load} /> : null}
         {settings && (
           <dl className="kv">
-            <div><dt>Mail server IP</dt><dd className="mono">{settings.mailIp ?? <span className="muted">Not set</span>}</dd></div>
+            <div><dt>Mail server IP</dt><dd className="mono">{settings.mailIp ?? <span className="muted">Not set</span>}
+              {settings.mailServer && <span className="muted small" style={{ fontFamily: "inherit" }}> from server{" "}
+                {can("SERVERS:VIEW") ? <Link href={`/servers/list/${settings.mailServer.publicId}`}>{settings.mailServer.name}</Link> : settings.mailServer.name}</span>}
+            </dd></div>
             <div><dt>DKIM selector</dt><dd className="mono">{settings.dkimSelector}</dd></div>
             <div><dt>DKIM public key</dt><dd>{settings.dkimPublicKey
               ? <span className="mono" title={settings.dkimPublicKey}>{settings.dkimPublicKey.slice(0, 24)}… ({settings.dkimPublicKey.length} chars)</span>
@@ -104,7 +108,13 @@ function SettingsForm(props: { path: string; settings: DnsSettings; onClose: () 
   return (
     <ModalForm open onClose={props.onClose} onSubmit={submit} title="Managed records" size="wide" icon={<Pencil />}
       text="Saving changes nothing at Namecheap. Preview and write the records afterwards." submitLabel="Save">
-      {input("mailIp", "Mail server IP (IPv4)", mailIp, setMailIp, "Used for A @/mail/webmail and SPF. Later it comes from the linked server.", "203.0.113.10")}
+      {s.mailServer ? (
+        <div className="field">
+          <span className="label">Mail server IP</span>
+          <p className="mono" style={{ margin: 0 }}>{s.mailServer.ip}</p>
+          <span className="help">From the linked server {s.mailServer.name}. Unlink it (Server management) to type an IP here.</span>
+        </div>
+      ) : input("mailIp", "Mail server IP (IPv4)", mailIp, setMailIp, "Used for A @/mail/webmail and SPF. Linking a server to this domain fills it from the server.", "203.0.113.10")}
       {input("dkimSelector", "DKIM selector", selector, setSelector, "The old app used \"mail\".")}
       <div className="field">
         <label className="label" htmlFor="dkimPublicKey">DKIM public key <span className="muted">(optional)</span></label>
@@ -112,7 +122,7 @@ function SettingsForm(props: { path: string; settings: DnsSettings; onClose: () 
           spellCheck={false} placeholder="MIIBIjANBgkqh… or the whole v=DKIM1; k=rsa; p=… record"
           onChange={(e) => setKey(e.target.value)} style={{ height: "auto", paddingTop: 8 }} />
         {err("dkimPublicKey") ? <FieldError text={err("dkimPublicKey")!} />
-          : <span className="help">Paste the public key from the mail server (opendkim). Until the MTA module exists, MasterDB does not make keys.</span>}
+          : <span className="help">Filled by Install MTA (the key is made on the server), or paste one from another mail server.</span>}
       </div>
       <div className="field">
         <label className="label" htmlFor="dmarcPolicy">DMARC policy</label>

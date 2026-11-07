@@ -42,6 +42,7 @@ const TITLES: (readonly [string, string])[] = [
   ["/users", "Users & permissions"],
   ["/activity", "Activity log"],
   ["/account", "My account"],
+  ["/dev/components", "Components"],
   ["/", "Dashboard"],
 ]
 

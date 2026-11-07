@@ -419,3 +419,22 @@ select.filter{appearance:none;padding-right:30px;background-image:linear-gradien
   .pager .hide-sm{display:none}
   .modal-foot{flex-wrap:wrap}
 }
+
+/* ---------- Live numbers (M2): progress ring, counters, freshness line ---------- */
+.pring{position:relative;display:inline-grid;place-items:center;flex:none}
+.pring svg{position:absolute;inset:0}
+.pring-center{position:relative;display:grid;justify-items:center;text-align:center;gap:2px;padding:0 10px}
+.pring-center b{font-size:24px;line-height:28px;font-weight:600;letter-spacing:-.01em}
+.pring-center span{font-size:12px;line-height:16px;color:var(--muted-fg)}
+.counters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.counter{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:grid;gap:4px;min-width:0}
+.counter-l{font-size:12px;color:var(--muted-fg);display:flex;align-items:center;gap:6px}
+.counter-v{font-size:24px;line-height:30px;font-weight:600;letter-spacing:-.01em}
+.counter-h{font-size:12px;color:var(--muted-fg)}
+.counter[class*="tone-"] .counter-l::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+.counter.tone-green{--c:var(--success)}.counter.tone-red{--c:var(--destructive)}.counter.tone-amber{--c:#C47F0A}
+.counter.tone-purple{--c:var(--purple-fg)}.counter.tone-teal{--c:var(--teal-fg)}.counter.tone-grey{--c:var(--grey-fg)}
+.counter.tone-blue{--c:var(--info)}.counter.tone-primary{--c:var(--primary)}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted-fg)}
+.live svg{width:14px;height:14px}
+.live.bad{color:var(--destructive-text)}

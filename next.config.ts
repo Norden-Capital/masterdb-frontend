@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants";
 
 // Safety headers on every page (same set as LMS). Framing is allowed for this
 // site only ('self'), so no other site can show these pages inside its own.
@@ -10,8 +11,14 @@ const SECURITY_HEADERS = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
 ];
 
-const nextConfig: NextConfig = {
-  /* config options here */
+// Files named page.dev.tsx / route.dev.ts exist only under `next dev`
+// (/dev/components and its demo endpoints): a production build does not
+// contain them at all, so those paths are a plain 404 there.
+const DEV_ONLY = ["dev.tsx", "dev.ts"];
+const EXTENSIONS = ["tsx", "ts", "jsx", "js"];
+
+const nextConfig = (phase: string): NextConfig => ({
+  pageExtensions: phase === PHASE_DEVELOPMENT_SERVER ? [...DEV_ONLY, ...EXTENSIONS] : EXTENSIONS,
   experimental: {
     agentFeedback: true,
   },
@@ -34,6 +41,6 @@ const nextConfig: NextConfig = {
   // app/api/[...path]/route.ts, which adds the proxy secret the backend
   // requires (a rewrite cannot add request headers). It reads BACKEND_URL and
   // PROXY_SECRET at request time, server-side only.
-};
+});
 
 export default nextConfig;

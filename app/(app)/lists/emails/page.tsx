@@ -63,7 +63,7 @@ export default function ListsPage() {
       render: (l) => {
         const st = listStatus(l.status)
         return <>
-          <Link href={`/lists/emails/${l.publicId}`} style={{ fontWeight: 600, wordBreak: "break-word" }}>{l.name}</Link>
+          <Link href={`/lists/emails/${l.publicId}`} style={{ fontWeight: 600, wordBreak: "break-word", display: "inline-block", minWidth: 160 }}>{l.name}</Link>
           {l.status !== "READY" && <span><span className={`pill ${st.tone}`}>{st.label}</span></span>}
         </>
       },

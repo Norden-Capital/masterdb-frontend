@@ -72,7 +72,7 @@ export function ListDetailView() {
       <div className="page-head">
         <h1 style={{ wordBreak: "break-word" }}>{list.name}</h1>
         <span className={`pill ${st.tone}`}>{st.label}</span>
-        <div className="actions">
+        <div className="actions" style={{ flexWrap: "wrap" }}>
           {ready && <ValidateListButton list={list} />}
           {ready && can("LISTS:EXPORT") && <a className="btn" href={`/api/v1/lists/${id}/export`} download><Download />Export CSV</a>}
           {can("LISTS:EDIT") && <button className="btn" onClick={() => setEditing(true)}><Pencil />Edit</button>}
@@ -140,7 +140,7 @@ function PartsCard({ list, parts }: { list: ListItem; parts: ListPart[] }) {
   return (
     <div className="card" style={{ marginBottom: 16 }}>
       <div className="card-head"><h2>Parts</h2><span className="right small muted">Split by {count(list.splitSize || list.records)}</span></div>
-      <div className="tbl-scroll">
+      <div className="tbl-scroll" style={{ maxHeight: 420, overflowY: "auto" }}>
         <table className="t" aria-label="Parts of this list">
           <thead><tr><th>Part</th><th className="num">Records</th><th>Lines</th><th>Validation</th><th aria-label="Actions" /></tr></thead>
           <tbody>

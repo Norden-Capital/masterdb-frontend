@@ -215,7 +215,7 @@ function MappingStage({ list, onStarted }: { list: ListItem; onStarted: () => vo
         </div>
         <div className="tbl-scroll" style={{ marginBottom: 16 }}>
           <table className="t" aria-label="First rows of the file">
-            <thead><tr>{names.map((n, i) => <th key={i} style={i === column ? { background: "var(--accent, var(--track))" } : undefined}>{n}{i === column ? " · email" : ""}</th>)}</tr></thead>
+            <thead><tr>{names.map((n, i) => <th key={i} style={i === column ? { background: "var(--primary-soft)", color: "var(--primary-text)" } : undefined}>{n}{i === column ? " · email" : ""}</th>)}</tr></thead>
             <tbody>
               {rows.map((r, ri) => (
                 <tr key={ri}>{names.map((_, i) => <td key={i} className={i === column ? "mono" : undefined} style={i === column ? { fontWeight: 600 } : undefined}>{r[i] ?? ""}</td>)}</tr>

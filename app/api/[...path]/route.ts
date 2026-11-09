@@ -29,9 +29,9 @@ import { clientIp, isSameOriginWrite, ownOrigins } from "@/lib/proxy-guards"
  *
  * Passed through intact: method, path, query string, body, status code,
  * `Set-Cookie` (each cookie separately), `X-Request-Id` both ways, redirects
- * (not followed: the browser sees them). Known limit: Vercel caps a function's
- * request body at 4.5 MB, so large uploads (contact imports) will need their
- * own route later.
+ * (not followed: the browser sees them). Vercel caps a function's request
+ * body at 4.5 MB, so list files come through here in 3 MB chunks
+ * (lib/lists.ts sendFile → PUT /api/v1/lists/{id}/upload?offset=N).
  */
 
 /** Never forwarded to the backend. */

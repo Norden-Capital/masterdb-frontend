@@ -52,12 +52,22 @@ npm run build
   | Servers: one server (details, edit, Connect → check fingerprint once → Trust, optionally with the root password used once to add MasterDB's key; changed key = blocked, Owner accepts; health per check with Re-check; linked domain and HELO / MAIL FROM) | `/servers/list/[id]` |
   | MTA: Install MTA (choose a ready server, optional webmail, live steps / progress ring / scrubbed output, then the DNS preview → write card) | `/mta/install?server=&job=` |
   | MTA: MTA list (service states, versions, queue size, when read; refresh, remove from list) | `/mta/list` |
+  | Lists: Add list (name, ESP, country, remove duplicates, vertical, split by; a .txt/.csv from the PC or a Google Drive link; then the real upload progress, the email column, the import progress and the report) | `/lists/add` |
+  | Lists: List emails (search, ESP / country / vertical / source / status filters, latest validation, delete with typed confirm) | `/lists/emails` |
+  | Lists: one list (details, edit, import report, latest validation, parts, addresses page by page with the file's own columns, export CSV; an unfinished upload goes on here with the same file) | `/lists/emails/[id]` |
   | Validation: Email validation (one address through one server: category, reason, the provider's reply, SMTP conversation; history 90 days) | `/validation/check` |
   | Validation: Bulk validation (paste or open a .txt/.csv, choose servers, start; pacing per provider and pauses running now) | `/validation/bulk` |
   | Validation: Results (one row per job) and one job live (round chart of the six categories, counters, servers, stop / resume / retry unknown / delete, exports per category + detailed CSV, addresses) | `/validation/results`, `/validation/results/[id]` |
   | Validation: List status (every address by its latest result, in six sections) | `/validation/status` |
   | MTA: MTA manager (start / stop / restart / reset per service or all, stop and restart confirmed; mail queue and flush; recent logs) | `/mta/manager?server=` |
 
+- **Big uploads** (`lib/lists.ts`, `app/(app)/lists/import-flow.tsx`): Vercel caps a request
+  body at about 4.5 MB, so a list file goes through the same `/api` proxy (with the proxy
+  secret, like every call) in 3 MB chunks, `PUT /api/v1/lists/{id}/upload?offset=N`, one after
+  the other. The ring shows only `received`, the bytes the server says it has saved; a failed
+  chunk is retried (1, 2, 4… s), a 409 offset answer moves to the server's position, and a
+  stopped upload goes on from the list's page when the same file is chosen again. The browser
+  never calls the API directly.
 - **Session**: `components/md/session.tsx` loads `/api/v1/auth/me` (user + effective
   permissions). `can("USERS:EDIT")` hides menu items and buttons; the API checks again. Any
   401 `UNAUTHENTICATED` while a page is open → `/session-expired`, and the page you were on is

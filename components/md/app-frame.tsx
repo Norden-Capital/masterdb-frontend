@@ -19,15 +19,17 @@ type NavItem = Exclude<NavEntry, { key: string }> | (Extract<NavEntry, { key: st
 /**
  * The menu (mock app.js NAV). Items the user may not open are hidden; modules
  * that are not built yet are shown greyed as "coming soon", never as fake pages.
- * Lists have no permission of their own: they belong to Contacts (CONTACTS:VIEW).
+ * Lists have their own permission (LISTS:*) since List management.
  */
 const NAV: NavItem[] = [
   { grp: "Workspace" },
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/", perm: "DASHBOARD:VIEW" },
   { key: "contacts", label: "Contacts", icon: Contact, perm: "CONTACTS:VIEW", soon: true },
-  { key: "lists", label: "Lists", icon: List, perm: "CONTACTS:VIEW", soon: true },
   { key: "segments", label: "Segments & exports", icon: Filter, perm: "SEGMENTS:VIEW", soon: true },
   { key: "suppression", label: "Suppression", icon: Ban, perm: "SUPPRESSION:VIEW", soon: true },
+  { grp: "List management" },
+  { key: "add-list", label: "Add list", icon: Plus, href: "/lists/add", perm: "LISTS:CREATE" },
+  { key: "list-emails", label: "List emails", icon: List, href: "/lists/emails", perm: "LISTS:VIEW" },
   { grp: "Validation" },
   { key: "email-validation", label: "Email validation", icon: MailSearch, href: "/validation/check", perm: "VALIDATION:VIEW" },
   { key: "bulk-validation", label: "Bulk validation", icon: Layers, href: "/validation/bulk", perm: "VALIDATION:VIEW" },
@@ -53,6 +55,8 @@ const NAV: NavItem[] = [
 ]
 
 const TITLES: (readonly [string, string])[] = [
+  ["/lists/add", "Add list"],
+  ["/lists/emails", "List emails"],
   ["/validation/check", "Email validation"],
   ["/validation/bulk", "Bulk validation"],
   ["/validation/results", "Validation results"],

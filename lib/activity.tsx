@@ -1,5 +1,5 @@
 import {
-  CircleAlert, CircleSlash, CloudDownload, Download, Globe, History, Stethoscope, Trash2, Upload, KeyRound, PlugZap, LockKeyhole, LogIn, LogOut, Mail, MailCheck, MailX, RotateCcw,
+  CircleAlert, CircleSlash, ListChecks, ListPlus, ListX, CloudDownload, Download, Globe, History, Stethoscope, Trash2, Upload, KeyRound, PlugZap, LockKeyhole, LogIn, LogOut, Mail, MailCheck, MailX, RotateCcw,
   Send, ShieldCheck, SlidersHorizontal, UserPlus,
 } from "lucide-react"
 
@@ -40,6 +40,14 @@ export const ACTIONS: Record<string, Meta> = {
   DNS_RECORDS_WRITTEN: { label: "Wrote DNS records", icon: Upload },
   DNS_RECORDS_RESTORED: { label: "Restored DNS records", icon: History },
   DNS_HEALTH_CHECKED: { label: "Checked DNS health", icon: Stethoscope },
+  LIST_CREATED: { label: "Added a list", icon: ListPlus },
+  LIST_UPLOADED: { label: "Uploaded a list file", icon: Upload },
+  LIST_IMPORT_STARTED: { label: "Started a list import", icon: Upload },
+  LIST_IMPORTED: { label: "Imported a list", icon: ListChecks },
+  LIST_IMPORT_FAILED: { label: "List import failed", icon: ListX, failed: true },
+  LIST_UPDATED: { label: "Edited a list", icon: SlidersHorizontal },
+  LIST_DELETED: { label: "Deleted a list", icon: Trash2 },
+  LIST_EXPORTED: { label: "Exported a list", icon: Download },
 }
 
 export function actionMeta(action: string): Meta {

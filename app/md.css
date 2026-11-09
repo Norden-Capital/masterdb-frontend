@@ -30,7 +30,7 @@
   --blue-bg:#E7ECFB;--blue-bd:#8EA6E8;--blue-fg:#2F55D4;
   color-scheme:light;
 }
-:root[data-theme="dark"]{
+:root[data-theme="dark"],.am[data-look="dark"]{
   --topbar:#141619;--topbar-fg:#F1F2F4;--topbar-search:#2A2E33;--topbar-muted:#8D939B;
   --primary:#FF6B45;--primary-hover:#FF825F;--primary-fg:#FFFFFF;--primary-text:#FF8A6A;--primary-soft:#3A2520;
   --fg:#E8EAED;--muted-fg:#A0A6AE;--subtle-fg:#7A8089;
@@ -439,3 +439,352 @@ select.filter{appearance:none;padding-right:30px;background-image:linear-gradien
 .live svg{width:14px;height:14px}
 .live.bad{color:var(--destructive-text)}
 .soon-tile{background:var(--surface-2)}
+
+/* ======================================================================
+ * Design pass (2026-11-09): approved page previews, ported. Tokens only.
+ * ====================================================================== */
+:root{
+  --kpi-num:26px;
+  --row-h:64px;
+  --bottombar-h:64px;
+}
+
+/* ---------- Focus: visible keyboard focus on every control (was inputs only) ---------- */
+a:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible,[tabindex]:focus-visible,.cb:focus-visible,.switch:focus-visible{
+  outline:2px solid var(--info);outline-offset:2px;border-radius:var(--radius)
+}
+.topbar a:focus-visible,.topbar button:focus-visible{outline-color:#fff}
+
+/* ---------- Sidebar: modules only ---------- */
+.sidebar{padding:12px 0}
+.sidebar .nav-item{height:44px}
+.sidebar .nav-item svg{width:20px;height:20px}
+
+/* ---------- Sub-tabs: the pages of one module ---------- */
+.subtabs{gap:4px;overflow-x:auto;scrollbar-width:none}
+.subtabs::-webkit-scrollbar{display:none}
+.subtabs a{padding:0 12px;font-size:14px;white-space:nowrap}
+.subtabs a.active{color:var(--fg);border-color:var(--primary);font-weight:600}
+.subtabs .right{display:flex;gap:8px;align-items:center;padding-left:16px}
+.subtabs .right a{border:0;height:auto;color:var(--muted-fg);gap:6px;font-size:13px;padding:0}
+.subtabs .right a:hover{color:var(--fg)}
+
+/* ---------- Page head ---------- */
+.page{max-width:none}
+.page-head{margin-bottom:24px}
+.page-head .meta{display:inline-flex;align-items:center;gap:6px}
+.crumb{display:inline-flex;align-items:center;gap:6px;color:var(--muted-fg);font-size:13px;font-weight:500;margin-bottom:10px}
+.crumb:hover{color:var(--fg);text-decoration:none}
+.crumb svg{width:16px;height:16px}
+
+/* ---------- KPI strip (no boxes, dividers between) ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:28px}
+.kpi{padding:2px 24px;border-left:1px solid var(--border);display:grid;gap:6px;min-width:0}
+.kpi:first-child{border-left:0;padding-left:0}
+.kpi-l{display:flex;align-items:center;gap:8px;color:var(--muted-fg);font-size:13px}
+.kpi-l svg{width:18px;height:18px}
+.kpi-v{display:flex;align-items:center;gap:10px;font-size:var(--kpi-num);line-height:32px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.kpi-m{font-size:12px;color:var(--muted-fg)}
+.kpi-m b{color:var(--fg);font-weight:600}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:20px}.kpi{padding:2px 16px}.kpi:nth-child(odd){border-left:0;padding-left:0}}
+
+/* ---------- Cards ---------- */
+.card-head .link{margin-left:auto;color:var(--primary-text);font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:2px}
+.card-head .link svg{width:16px;height:16px}
+.card-head>svg{color:var(--muted-fg)}
+.grid-main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px}
+@media (max-width:1100px){.grid-main{grid-template-columns:1fr}}
+.stack{display:grid;gap:24px}
+
+/* Stacked share bar (e.g. team by status): neutral, never orange */
+.sharebar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--track);gap:2px}
+.sharebar span{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:12px;font-size:13px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.legend b{font-variant-numeric:tabular-nums;font-weight:600}
+
+/* Mini list rows inside a card (jobs, recent lists) */
+.mini{display:grid}
+.mini-row{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--row);color:var(--fg)}
+.mini-row:last-child{border-bottom:0}
+.mini-row:hover{background:var(--accent,var(--muted));text-decoration:none}
+.mini-row .grow{flex:1;min-width:0}
+.mini-row .grow b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-row .grow span{display:block;font-size:12px;color:var(--muted-fg)}
+.mini-row .end{text-align:right;font-variant-numeric:tabular-nums}
+.mini-row .end span{display:block;font-size:12px;color:var(--muted-fg)}
+.minibar{height:6px;border-radius:3px;background:var(--track);overflow:hidden;margin-top:6px;display:flex}
+.minibar span{display:block;height:100%}
+
+/* Category solid colours as tokens (design direction 2.2) */
+:root{--cat-valid:#43A838;--cat-bounce:#E5484D;--cat-soft:#C47F0A;--cat-reject:#8E4EC6;--cat-catchall:#1A9C9C;--cat-unknown:#8B95A3}
+.c-valid{background:var(--cat-valid)}.c-bounce{background:var(--cat-bounce)}.c-soft{background:var(--cat-soft)}
+.c-reject{background:var(--cat-reject)}.c-catchall{background:var(--cat-catchall)}.c-unknown{background:var(--cat-unknown)}
+
+/* ---------- Phone: bottom tab bar instead of the sidebar ---------- */
+.bottombar{display:none}
+.more-sheet{display:none}
+@media (max-width:767px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .sidebar{display:none}
+  .tb-search,.tb-user div,.tb-div,.tb-icon.hide-sm{display:none}
+  .topbar{gap:10px;padding:0 12px}
+  .logo{font-size:0;gap:0}
+  .tb-title{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+  .tb-spacer{display:none}
+  .page{padding:20px 16px calc(var(--bottombar-h) + 96px)}
+  .subtabs{padding:0 8px}
+  .page-head h1{font-size:22px;line-height:28px}
+  .page-head .actions{margin-left:0;width:100%}
+  .page-head .actions .btn{flex:1}
+  .bottombar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;height:var(--bottombar-h);background:var(--card);border-top:1px solid var(--border);z-index:40;padding-bottom:env(safe-area-inset-bottom)}
+  .bottombar a,.bottombar button{display:grid;justify-items:center;align-content:center;gap:4px;font:inherit;font-size:11px;font-weight:500;color:var(--muted-fg);border:0;background:transparent;cursor:pointer;position:relative}
+  .bottombar svg{width:22px;height:22px}
+  .bottombar .on{color:var(--primary-text)}
+  .bottombar .on svg{color:var(--primary)}
+  .bottombar .on::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--primary)}
+  .bottombar a:hover{text-decoration:none}
+  .more-sheet:not([hidden]){display:block;position:fixed;left:0;right:0;bottom:var(--bottombar-h);z-index:41;background:var(--popover);border-top:1px solid var(--border);border-radius:16px 16px 0 0;box-shadow:var(--shadow-modal);padding:12px}
+  .more-sheet a{display:flex;align-items:center;gap:12px;height:48px;padding:0 12px;border-radius:10px;color:var(--fg);font-weight:500}
+  .more-sheet a:hover{background:var(--muted);text-decoration:none}
+  .more-sheet svg{color:var(--muted-fg)}
+  .more-sheet hr{border:0;border-top:1px solid var(--border);margin:6px 0}
+  .bulkbar{bottom:calc(var(--bottombar-h) + 12px)}
+  .toast-stack{bottom:calc(var(--bottombar-h) + 12px)}
+}
+
+/* Sign-in pages (no app frame): toasts at the bottom centre */
+body:has(.am) .toast-stack{left:50%;right:auto;transform:translateX(-50%);justify-items:center;z-index:110}
+@media (max-width:600px){body:has(.am) .toast-stack{left:12px;right:12px;transform:none;bottom:12px}}
+
+/* Sign-in palette (the log-in reference): dark by default, light kept for later */
+.am[data-look="dark"]{
+  --am-bg:#0A0A0A;--am-fg:#FAFAFA;--am-muted:#A1A1AA;--am-input:#141414;--am-border:#27272A;--am-placeholder:#71717A;
+  --am-link:#FAFAFA;--am-err:#FF8A96;color-scheme:dark
+}
+.am[data-look="light"]{
+  --am-bg:#FFFFFF;--am-fg:#2B2E31;--am-muted:#6E747C;--am-input:#FFFFFF;--am-border:#E2E2E2;--am-placeholder:#9A9EA5;
+  --am-link:#2B2E31;--am-err:#C8323F;color-scheme:light
+}
+.am{--am-btn:var(--primary);--am-btn-hover:var(--primary-hover);--am-btn-fg:#FFFFFF;--am-focus:var(--primary);min-height:100vh;background:var(--am-bg);color:var(--am-fg)}
+.am .auth{min-height:100vh}
+
+/* ---------- Sign-in skin: every .auth page in the log-in look (no card) ---------- */
+/* Point the shared tokens at the sign-in palette, so inputs, steps, codes, banners all follow. */
+.am[data-look="dark"]{
+  --bg:#0A0A0A;--canvas:#0A0A0A;--card:#141414;--popover:#18181B;--muted:#18181B;--surface-2:#141414;--chip:#27272A;
+  --border:#27272A;--border-strong:#27272A;--track:#27272A;--fg:#FAFAFA;--muted-fg:#A1A1AA;--subtle-fg:#71717A;--primary-text:#FF8A6A
+}
+.am[data-look="light"]{--canvas:#FFFFFF}
+.am .auth{background:var(--am-bg)}
+.am .auth-card,.am .auth-card.wide{background:transparent;border-radius:0;padding:0;width:min(384px,100%)}
+.am .auth-card.wide{width:min(440px,100%)}
+.am .auth-logo{justify-content:center;font-size:0;gap:0;margin-bottom:22px}
+.am .auth-logo .logo-mark{width:36px;height:36px;border-radius:9px;font-size:18px}
+.am .auth h1{text-align:center;font-size:24px;line-height:32px;font-weight:700;letter-spacing:-.015em}
+.am .auth .lead{text-align:center;margin:8px 0 28px;color:var(--am-muted)}
+.am .auth .label{font-size:14px;font-weight:600}
+.am .auth .input{height:40px;background:var(--am-input);border-color:var(--am-border);color:var(--am-fg)}
+.am .auth .input::placeholder{color:var(--am-placeholder)}
+.am .auth .input-wrap>svg{top:11px}
+.am .auth .input-wrap .suffix{top:4px}
+.am .auth .btn{height:40px;border-radius:8px}
+.am .auth .btn.primary{background:var(--am-btn);border-color:var(--am-btn);color:var(--am-btn-fg)}
+.am .auth .btn.primary:hover{background:var(--am-btn-hover)}
+.am .auth .btn:not(.primary):not(.round){background:transparent;border-color:var(--am-border);color:var(--am-fg)}
+.am .auth .btn:not(.primary):not(.round):hover{background:var(--am-input)}
+.am .auth .round{background:transparent;border-color:var(--am-border);color:var(--am-muted)}
+.am .auth a:not(.btn){color:var(--am-link);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--am-border)}
+.am .auth a:not(.btn):hover{text-decoration-color:var(--am-link)}
+.am .auth .help,.am .auth-foot{color:var(--am-muted);font-size:13px}
+.am .auth-foot{margin-top:28px}
+.am .auth .err{color:var(--am-err);font-size:13px}
+.am .auth .otp input{background:var(--am-input);border-color:var(--am-border);color:var(--am-fg);height:52px;width:46px}
+.am .auth .otp.invalid input{border-color:var(--am-err)}
+.am .auth .codes{background:var(--am-input);border-color:var(--am-border);color:var(--am-fg)}
+.am .auth .secret{color:var(--am-muted)}
+.am .auth .secret b{color:var(--am-fg)!important}
+.am .auth b[style*="var(--fg)"]{color:var(--am-fg)!important}
+.am .auth .banner.red{background:var(--am-alert-bg);border-color:var(--am-alert-bd);color:var(--am-alert-fg)}
+.am .auth .chip{background:var(--am-input);border:1px solid var(--am-border);color:var(--am-fg)}
+.am .auth .icon-badge{background:var(--am-input);border:1px solid var(--am-border)}
+.am .auth .icon-badge.green{color:var(--green-fg)}
+.am .auth .icon-badge.amber{color:var(--amber-fg)}
+.am .auth .icon-badge.orange{color:var(--primary)}
+.am .auth .cb{background:var(--am-input);border-color:var(--am-border)}
+.am .auth .cb:checked{background:var(--selection);border-color:var(--selection)}
+.am .auth .check{color:var(--am-fg)}
+.am .auth input[disabled]{background:var(--am-input)!important;color:var(--am-muted)!important;opacity:.8}
+.am .auth .input.invalid{border-color:var(--am-err);box-shadow:0 0 0 3px color-mix(in srgb,var(--am-err) 18%,transparent)}
+
+/* Sign-in header: title + one short line, always one row each */
+.am .auth h1,.am .am-head h1{font-size:22px;line-height:28px;white-space:nowrap}
+.am .auth .lead,.am .am-head p{font-size:13px;line-height:20px;white-space:nowrap;max-width:none}
+body:has(.am) .toast{border:1px solid #27272A}
+.am .auth .otp{gap:8px}
+.am .auth .otp input{width:clamp(36px,calc((100vw - 72px) / 6),46px)}
+.am .auth a.go-back{display:inline-flex;align-items:center;gap:2px}
+.am .auth a.go-back svg{width:16px;height:16px}
+/* Status screens (link sent, expired, done...): the icon alone, no logo above it, no circle behind it */
+.am .auth-card:has(.auth-center:not([hidden]) .icon-badge) .auth-logo,.am .auth-card.auth-center .auth-logo{display:none}
+.am .auth .auth-center .icon-badge{background:transparent;border:0;width:auto;height:auto;margin:0 auto 16px}
+.am .auth .auth-center .icon-badge svg{width:40px;height:40px;stroke-width:1.6}
+.am .auth .auth-center .icon-badge,.am .auth .auth-center .icon-badge.amber,.am .auth .auth-center .icon-badge.orange{color:var(--primary)}
+.am .auth .auth-center .icon-badge.green{color:var(--green-fg)}
+/* Notes under the main button are centred, like the rest of the sign-in pages */
+.am .auth .btn.block ~ p.help{text-align:center}
+
+/* Recovery code: 5 + 5 boxes, same size as the 2FA code boxes, monospace like the saved codes */
+.otp.rc{gap:6px;align-items:center}
+.otp.rc input{font-family:ui-monospace,'Geist Mono',Consolas,monospace;font-size:18px;text-transform:lowercase}
+.otp.rc input::placeholder{font-size:18px;color:var(--subtle-fg)}
+.am .auth .otp.rc{gap:5px}
+.am .auth .otp.rc input{width:clamp(22px,calc((100vw - 32px - 70px) / 10),32px);height:46px;padding:0}
+.rc-dash{color:var(--muted-fg);font-size:18px;width:10px;text-align:center}
+.otp input::placeholder{color:var(--subtle-fg)}
+/* Recovery boxes share the column width, so the row can never be wider than the button */
+.am .auth .otp.rc{display:flex;justify-content:center;width:100%;gap:6px}
+.am .auth .otp.rc input{flex:1 1 0;min-width:0;max-width:36px;width:auto;padding:0;text-align:center;text-indent:0;letter-spacing:0}
+.am .auth .otp.rc .rc-dash{flex:none}
+.am .auth .field:has(.otp.rc) .label{margin-bottom:8px}
+.am .auth .field:has(.otp.rc){grid-template-columns:minmax(0,1fr)}
+.am .auth .field:has(.otp.rc)>div{min-width:0}
+.am .auth .otp.rc input{width:0}
+
+/* ---------- Chevron stepper (design direction 4.6, blue = data/progress) ---------- */
+.stepper{display:flex;list-style:none;margin:0 0 28px;padding:0;gap:0}
+.stepper li{flex:1 1 0;min-width:0;height:40px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 10px 0 22px;
+  font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--muted);color:var(--muted-fg);margin-left:-8px}
+.stepper li svg{width:14px;height:14px;flex:none}
+.stepper li.first{margin-left:0;padding-left:12px;border-radius:8px 0 0 8px;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%)}
+.stepper li.mid{clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%,14px 50%)}
+.stepper li.last{padding-right:12px;border-radius:0 8px 8px 0;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,14px 50%)}
+.stepper li.on{background:var(--info);color:#fff}
+.stepper li+li{box-shadow:none}
+.am .stepper li:not(.on){background:var(--am-input);color:var(--am-muted)}
+/* thin gap between chevrons: draw the page colour behind */
+.stepper{background:transparent;filter:drop-shadow(0 0 0 transparent)}
+.stepper li:not(.first){margin-left:-6px}
+
+/* ---------- Bigger QR ---------- */
+.am .auth .qr{width:220px;height:220px;padding:14px;border-radius:12px}
+
+/* ---------- Field errors: small, one row on every device ---------- */
+.am .auth .err,.am .am-err{font-size:12px;line-height:16px;white-space:nowrap}
+
+/* ---------- Save codes step ---------- */
+.codes-card{border:1px solid var(--am-border,var(--border));border-radius:12px;background:var(--am-input,var(--card));overflow:hidden}
+.codes-head{display:flex;align-items:center;justify-content:space-between;padding:10px 10px 10px 16px;border-bottom:1px solid var(--am-border,var(--border));font-size:13px;font-weight:600;color:var(--am-fg,var(--fg))}
+.codes-head>span:first-child{display:inline-flex;align-items:center;gap:8px}
+.codes-head>span:first-child svg{width:16px;height:16px;color:var(--primary)}
+.codes-actions{display:flex;gap:4px}
+.icon-btn{width:32px;height:32px;border:1px solid var(--am-border,var(--border));border-radius:8px;background:transparent;color:var(--am-muted,var(--muted-fg));display:grid;place-items:center;cursor:pointer}
+.icon-btn:hover{color:var(--am-fg,var(--fg));background:var(--am-bg,var(--muted))}
+.icon-btn svg{width:16px;height:16px}
+.codes-list{list-style:none;margin:0;padding:14px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px}
+.codes-list li{display:flex;align-items:baseline;gap:10px;min-width:0}
+.codes-list .n{font-size:11px;color:var(--am-muted,var(--muted-fg));font-variant-numeric:tabular-nums;width:16px;flex:none}
+.codes-list code{font-family:ui-monospace,'Geist Mono',Consolas,monospace;font-size:14px;letter-spacing:.03em;color:var(--am-fg,var(--fg));white-space:nowrap}
+@media (max-width:360px){.codes-list{column-gap:10px}.codes-list code{font-size:13px;letter-spacing:0}}
+.codes-note{display:flex;align-items:center;justify-content:center;gap:6px;margin:12px 0 0}
+.codes-note svg{width:14px;height:14px;flex:none}
+.confirm-row{display:flex;align-items:center;gap:10px;margin:20px 0 16px;padding:12px 14px;border:1px solid var(--am-border,var(--border));border-radius:10px;cursor:pointer;font-size:14px;color:var(--am-fg,var(--fg))}
+.confirm-row:has(input:checked){border-color:var(--info)}
+.am .auth .btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+.stepper li:not(.first){margin-left:-11px}
+:root{--stepper:#3366F6}
+.stepper li.on{background:var(--stepper)}
+/* Sign-in pages use orange only (no blue): stepper, focus, checkboxes */
+:root{--stepper:var(--primary)}
+.stepper li{border:0;outline:0}
+.stepper li:not(.on){background:var(--am-border,var(--chip));color:var(--am-muted,var(--muted-fg))}
+.am[data-look]{--am-focus:var(--primary)}
+.am .auth .cb:checked,.am .cb:checked{background:var(--primary);border-color:var(--primary)}
+.confirm-row:has(input:checked){border-color:var(--primary)}
+.am .auth .input:focus,.am .am-input:focus,.am .auth .otp input:focus{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 25%,transparent)}
+/* Codes centred inside their card */
+.codes-list{grid-template-columns:repeat(2,auto);justify-content:center;column-gap:40px}
+@media (max-width:360px){.codes-list{column-gap:16px}}
+
+/* ---------- List pages: the table card always fills the page height (default, loading, empty, error) ---------- */
+.main{display:flex;flex-direction:column;min-height:calc(100vh - 60px)}
+.page:has(>.table-card){flex:1 0 auto;display:flex;flex-direction:column;padding-bottom:32px}
+.page:has(>.table-card)>.table-card{flex:1 0 auto;display:flex;flex-direction:column;min-height:420px}
+.table-card>.tbl-scroll:not([hidden]){flex:1 0 auto}
+.table-card>.tbl-scroll[data-s="loading"]{flex:1 1 0;overflow:hidden}
+.table-card>.empty:not([hidden]){flex:1 0 auto;align-content:center}
+.table-card>.pager{margin-top:auto}
+.err-state .ic{background:var(--destructive-bg);color:var(--destructive-text)}
+@media (max-width:767px){.page:has(>.table-card){padding-bottom:calc(var(--bottombar-h) + 24px)}}
+@media (max-width:767px){.page:has(>.table-card)>.table-card{min-height:300px}}
+
+/* ---------- Scrollbars: transparent track with a left border, no arrows, square thumb ---------- */
+:root{--scroll-thumb:#C9CED6;--scroll-thumb-hover:#9A9EA5}
+:root[data-theme="dark"]{--scroll-thumb:#3A3F44;--scroll-thumb-hover:#5B6573}
+::-webkit-scrollbar{width:10px;height:10px;background:transparent}
+::-webkit-scrollbar-track{background:transparent;border-left:1px solid var(--border)}
+::-webkit-scrollbar-track:horizontal{border-left:0;border-top:1px solid var(--border)}
+::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border-radius:0;border:0}
+::-webkit-scrollbar-thumb:hover{background:var(--scroll-thumb-hover)}
+::-webkit-scrollbar-button{display:none;width:0;height:0}
+::-webkit-scrollbar-corner{background:transparent}
+@supports (-moz-appearance:none){*{scrollbar-width:thin;scrollbar-color:var(--scroll-thumb) transparent}}
+
+/* ---------- Header: user goes to My account, Log out button next to it ---------- */
+.tb-user{text-decoration:none}
+.tb-user:hover{text-decoration:none}
+.tb-logout{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:8px;border:1px solid rgb(255 255 255 / .18);color:var(--topbar-fg);font-size:13px;font-weight:500}
+.tb-logout:hover{background:rgb(255 255 255 / .08);text-decoration:none}
+.tb-logout svg{width:16px;height:16px}
+@media (max-width:767px){.tb-logout{width:36px;padding:0;justify-content:center}.tb-logout span{display:none}}
+
+/* ---------- Sidebar: always the 64px icon rail ---------- */
+.app.collapsed .sidebar,.sidebar{width:64px}
+.sidebar .nav-item span{display:none}
+.sidebar .nav-item{justify-content:center;padding:0;margin:2px 10px}
+.sidebar .nav-item.active::before{left:-10px}
+
+/* ---------- Table headers: chevron sort, drag to reorder columns ---------- */
+.t th .sort-ic{width:14px;height:14px;margin-left:4px;vertical-align:-2px;color:var(--subtle-fg)}
+.t th[aria-sort="ascending"] .sort-ic,.t th[aria-sort="descending"] .sort-ic{color:var(--fg)}
+.t th.sortable{cursor:pointer;user-select:none}
+.t th.movable{cursor:grab}
+.t th.movable:hover{color:var(--fg)}
+.t th.dragging{opacity:.45;cursor:grabbing}
+.t th.drop-before{box-shadow:inset 3px 0 0 var(--primary)}
+.t th.drop-after{box-shadow:inset -3px 0 0 var(--primary)}
+
+/* ---------- Sheet (side panel from the right, reference 07) ---------- */
+.backdrop.sheet-wrap{place-items:stretch end;padding:0;z-index:70}
+.sheet{width:min(640px,100vw);height:100vh;background:var(--popover);box-shadow:var(--shadow-modal);display:flex;flex-direction:column;animation:sheet-in .2s ease-out}
+@keyframes sheet-in{from{transform:translateX(24px);opacity:.6}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+.sheet-head{display:flex;align-items:center;gap:12px;height:68px;padding:0 24px;border-bottom:1px solid var(--border);flex:none}
+.sheet-head h2{font-size:20px;line-height:28px;font-weight:600}
+.sheet-close{width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:var(--fg);display:grid;place-items:center;cursor:pointer;margin-left:-8px}
+.sheet-close:hover{background:var(--muted)}
+.sheet-close svg{width:20px;height:20px}
+.sheet-body{flex:1;overflow:auto;padding:22px 24px}
+.sheet-foot{flex:none;display:flex;justify-content:flex-end;gap:10px;padding:14px 24px;border-top:1px solid var(--border);background:var(--popover)}
+@media (max-width:767px){.sheet-body{padding:18px 16px}.sheet-head,.sheet-foot{padding-left:16px;padding-right:16px}.sheet-foot .btn{flex:1}}
+/* Drag handle (six dots) on every movable column header */
+.t th .grip{width:14px;height:14px;margin:0 4px 0 -6px;vertical-align:-2px;color:var(--subtle-fg);opacity:.55;transition:opacity .15s}
+.t th.movable:hover .grip{opacity:1;color:var(--fg)}
+.t th.dragging .grip{opacity:1}
+.tb-logout{width:36px;padding:0;justify-content:center}
+.tb-logout svg{width:18px;height:18px}
+
+.more-sheet .more-logout{display:flex;align-items:center;gap:12px;width:100%;height:48px;padding:0 12px;border:0;border-radius:10px;background:transparent;font:inherit;font-weight:500;color:var(--destructive-text);cursor:pointer}
+.more-sheet .more-logout svg{color:var(--destructive-text)}
+.more-sheet .more-logout:hover{background:var(--destructive-bg)}
+.subtabs{flex:none}
+/* 403 over the app: a full screen, no frame */
+.full-screen{position:fixed;inset:0;z-index:90;overflow:auto}
+/* Pages with a stepper (2FA setup, accept invite) show no logo */
+.am .auth-card:has(.stepper) .auth-logo{display:none}
+.am .auth .link-btn{color:var(--am-link);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--am-border)}
+.am .auth .go-back{display:inline-flex;align-items:center;gap:2px}
+.am .auth .go-back svg{width:16px;height:16px}
+.am .auth .label-row a{font-size:13px}
+.am .auth .help{margin-left:auto;margin-right:auto}

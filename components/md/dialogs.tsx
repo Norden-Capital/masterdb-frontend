@@ -77,7 +77,7 @@ export function ConfirmDialog(props: {
               <label className="label" htmlFor={inputId}>
                 Type <span className="confirm-phrase">{props.typed}</span> to confirm
               </label>
-              <input id={inputId} className="input" value={value} autoFocus autoComplete="off" spellCheck={false}
+              <input id={inputId} className="input" value={value} autoFocus placeholder="Type it exactly" autoComplete="off" spellCheck={false}
                 onChange={(e) => setValue(e.target.value)} />
             </div>
           )}

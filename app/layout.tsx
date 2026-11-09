@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // data-theme is set before paint by THEME_SCRIPT (stored choice or system).
+    // data-theme is set before paint by THEME_SCRIPT (light only for now).
     <html lang="en" className={`${jakarta.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />

@@ -100,10 +100,6 @@ export default function ActivityPage() {
 
   return (
     <>
-      <div className="subtabs">
-        {can("USERS:VIEW") && <Link href="/users">Users</Link>}
-        <Link className="active" href="/activity">Activity log</Link>
-      </div>
       <div className="page">
         <div className="page-head">
           <h1>{t.data ? `${count(t.data.totalItems)} Event${t.data.totalItems === 1 ? "" : "s"}` : "Events"}</h1>

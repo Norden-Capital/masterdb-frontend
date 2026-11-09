@@ -1,11 +1,36 @@
 "use client"
 
-import { Check, CircleAlert, CircleSlash, Eye, EyeOff, Lock, LockKeyhole, Mail, X } from "lucide-react"
+import { ArrowRightToLine, Check, CircleAlert, CircleSlash, Eye, EyeOff, Lock, LockKeyhole, Mail, X } from "lucide-react"
 import { useEffect, useId, useRef, useState } from "react"
 
 import { strength } from "@/lib/password"
 import type { UserItem } from "@/lib/types"
 import { avatarTone, initials } from "@/lib/format"
+
+/** Side sheet from the right (reference 07): close button and title on top, body scrolls, footer stays. Esc and the dimmed page close it. */
+export function Sheet(props: { open: boolean; onClose: () => void; title: string; children?: React.ReactNode; footer?: React.ReactNode }) {
+  const titleId = useId()
+  const { open, onClose } = props
+  useEffect(() => {
+    if (!open) return
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && onClose()
+    window.addEventListener("keydown", esc)
+    return () => window.removeEventListener("keydown", esc)
+  }, [open, onClose])
+  if (!open) return null
+  return (
+    <div className="backdrop sheet-wrap" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <aside className="sheet" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+        <header className="sheet-head">
+          <button className="sheet-close" onClick={onClose} aria-label="Close"><ArrowRightToLine /></button>
+          <h2 id={titleId}>{props.title}</h2>
+        </header>
+        <div className="sheet-body">{props.children}</div>
+        {props.footer && <footer className="sheet-foot">{props.footer}</footer>}
+      </aside>
+    </div>
+  )
+}
 
 /** Modal over a dimmed page (mock .backdrop/.modal). Esc and the backdrop close it unless `locked`. */
 export function Modal(props: {
@@ -123,6 +148,84 @@ export function OtpInput(props: {
   )
 }
 
+/**
+ * A recovery code as 5 + 5 boxes ("xxxxx-xxxxx", the backend's format):
+ * typing moves on, Backspace goes back, paste fills all. `value` keeps the dash.
+ */
+export function RecoveryCodeInput(props: { value: string; onChange: (v: string) => void; invalid?: boolean; disabled?: boolean }) {
+  const refs = useRef<(HTMLInputElement | null)[]>([])
+  const chars = props.value.replace(/[^0-9a-z]/gi, "").toLowerCase().padEnd(10, " ").slice(0, 10).split("")
+  useEffect(() => {
+    refs.current[0]?.focus()
+  }, [])
+  const emit = (arr: string[]) => {
+    const clean = arr.join("").replace(/ /g, "").slice(0, 10)
+    props.onChange(clean.length > 5 ? `${clean.slice(0, 5)}-${clean.slice(5)}` : clean)
+    return clean
+  }
+  const box = (i: number) => (
+    <input
+      key={i}
+      ref={(el) => {
+        refs.current[i] = el
+      }}
+      aria-label={`Character ${i + 1}`}
+      autoComplete="off"
+      spellCheck={false}
+      placeholder="x"
+      maxLength={11}
+      value={chars[i].trim()}
+      disabled={props.disabled}
+      onChange={(e) => {
+        const typed = e.target.value.replace(/[^0-9a-z]/gi, "").toLowerCase()
+        if (typed.length > 1) {
+          const arr = [...chars]
+          typed.split("").forEach((c, k) => { if (i + k < 10) arr[i + k] = c })
+          const v = emit(arr)
+          refs.current[Math.min(v.length, 9)]?.focus()
+          return
+        }
+        const arr = [...chars]
+        arr[i] = typed || " "
+        emit(arr)
+        if (typed && i < 9) refs.current[i + 1]?.focus()
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Backspace" && !chars[i].trim() && i > 0) refs.current[i - 1]?.focus()
+        if (e.key === "ArrowLeft" && i > 0) refs.current[i - 1]?.focus()
+        if (e.key === "ArrowRight" && i < 9) refs.current[i + 1]?.focus()
+      }}
+      onPaste={(e) => {
+        e.preventDefault()
+        const all = e.clipboardData.getData("text").replace(/[^0-9a-z]/gi, "").toLowerCase().slice(0, 10)
+        const v = emit(all.padEnd(10, " ").split(""))
+        refs.current[Math.min(v.length, 9)]?.focus()
+      }}
+    />
+  )
+  return (
+    <div className={`otp rc ${props.invalid ? "invalid" : ""}`} role="group" aria-label="Recovery code">
+      {[0, 1, 2, 3, 4].map(box)}
+      <span className="rc-dash" aria-hidden="true">-</span>
+      {[5, 6, 7, 8, 9].map(box)}
+    </div>
+  )
+}
+
+/** Arrow steps (design direction 4.6): done and current steps orange (done with a tick), the rest grey. */
+export function Stepper({ steps, current, label }: { steps: string[]; current: number; label: string }) {
+  return (
+    <ol className="stepper" aria-label={label}>
+      {steps.map((s, i) => (
+        <li key={s} className={`${i === 0 ? "first" : i === steps.length - 1 ? "last" : "mid"} ${i <= current ? "on" : ""}`}
+          aria-current={i === current ? "step" : undefined}>
+          {i < current && <Check />}{s}
+        </li>
+      ))}
+    </ol>
+  )
+}
+
 /** Password input with a show/hide eye, optional strength bar (mock .strength). */
 export function PasswordField(props: {
   id: string
@@ -133,6 +236,7 @@ export function PasswordField(props: {
   meter?: boolean
   autoComplete?: string
   icon?: boolean
+  placeholder?: string
 }) {
   const [shown, setShown] = useState(false)
   const s = strength(props.value)
@@ -147,6 +251,7 @@ export function PasswordField(props: {
           type={shown ? "text" : "password"}
           value={props.value}
           autoComplete={props.autoComplete ?? "new-password"}
+          placeholder={props.placeholder}
           onChange={(e) => props.onChange(e.target.value)}
           aria-invalid={!!props.error}
         />

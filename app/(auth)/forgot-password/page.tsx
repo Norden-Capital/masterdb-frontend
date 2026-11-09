@@ -4,9 +4,8 @@ import { LoaderCircle, Mail, MailCheck } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
-import { AuthCard, BackToLogin } from "@/components/md/auth-card"
+import { AuthCard, BackToLogin, useErrorToast } from "@/components/md/auth-card"
 import { useToast } from "@/components/md/toast"
-import { Banner } from "@/components/md/ui"
 import { api, describe } from "@/lib/api"
 
 /** Mock 04. The answer is the same whether the email has an account (the backend never says). */
@@ -36,15 +35,17 @@ export default function ForgotPasswordPage() {
     }
   }
 
+  useErrorToast(error, error ? `Couldn't send the email. ${describe(error)}` : null)
+
   if (sent) {
     return (
       <AuthCard center>
         <div className="icon-badge green"><MailCheck /></div>
         <h1>Check your email</h1>
-        <p className="lead">If an account exists for <b style={{ color: "var(--fg)" }}>{email}</b>, a reset link is on its way. It expires in 30 minutes.</p>
-        <Link className="btn block" href="/login">Back to log in</Link>
+        <p className="lead">We sent a link to <b style={{ color: "var(--fg)" }}>{email}</b></p>
+        <Link className="btn block" href="/login">Go back</Link>
         <p className="help" style={{ marginTop: 16 }}>
-          Nothing after 5 minutes? Check spam, or{" "}
+          Only if that email has an account. The link expires in 30 minutes. Nothing after 5 minutes? Check spam, or{" "}
           <button className="link-btn" onClick={() => send(true)} disabled={busy}>send it again</button>.
         </p>
       </AuthCard>
@@ -53,8 +54,7 @@ export default function ForgotPasswordPage() {
   return (
     <AuthCard foot={<BackToLogin />}>
       <h1>Reset your password</h1>
-      <p className="lead">Enter your email and we&apos;ll send you a link to choose a new password.</p>
-      {error ? <Banner tone="red" title="Couldn't send the email">{describe(error)}</Banner> : null}
+      <p className="lead">We&apos;ll email you a link to set a new one.</p>
       <form onSubmit={(e) => { e.preventDefault(); send() }}>
         <div className="field">
           <label className="label" htmlFor="email">Email</label>

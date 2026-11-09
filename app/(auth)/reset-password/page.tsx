@@ -4,8 +4,8 @@ import { CircleCheck, ClockAlert, LoaderCircle } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 
-import { AuthCard } from "@/components/md/auth-card"
-import { Banner, PasswordField } from "@/components/md/ui"
+import { AuthCard, useErrorToast } from "@/components/md/auth-card"
+import { PasswordField } from "@/components/md/ui"
 import { api, ApiError, describe } from "@/lib/api"
 import { takeLinkToken } from "@/lib/link-token"
 import { MIN_PASSWORD, tooLong } from "@/lib/password"
@@ -52,13 +52,15 @@ export default function ResetPasswordPage() {
     }
   }
 
+  const serverField = error instanceof ApiError ? error.field("password") : undefined
+  useErrorToast(error, error && !serverField ? `Couldn't save the password. ${describe(error)}` : null)
   if (state === "checking") return <AuthCard center><p className="muted">Checking your link…</p></AuthCard>
   if (state === "expired") {
     return (
       <AuthCard center>
         <div className="icon-badge amber"><ClockAlert /></div>
         <h1>This link has expired</h1>
-        <p className="lead">Reset links work for 30 minutes and only once. Ask for a new one.</p>
+        <p className="lead">Reset links work once, for 30 minutes.</p>
         <Link className="btn primary block" href="/forgot-password">Send a new link</Link>
       </AuthCard>
     )
@@ -68,22 +70,21 @@ export default function ResetPasswordPage() {
       <AuthCard center>
         <div className="icon-badge green"><CircleCheck /></div>
         <h1>Password updated</h1>
-        <p className="lead">You&apos;ve been logged out everywhere. Log in with your new password and your authenticator code.</p>
+        <p className="lead">Log in with your new password.</p>
         <Link className="btn primary block" href="/login">Log in</Link>
+        <p className="help" style={{ marginTop: 14 }}>You&apos;ve been logged out everywhere. You&apos;ll also need your authenticator code.</p>
       </AuthCard>
     )
   }
-  const serverField = error instanceof ApiError ? error.field("password") : undefined
   return (
     <AuthCard>
       <h1>Choose a new password</h1>
-      <p className="lead">At least {MIN_PASSWORD} characters. A few unrelated words make a strong one.</p>
-      {error && !serverField ? <Banner tone="red" title="Couldn't save the password">{describe(error)}</Banner> : null}
+      <p className="lead">{MIN_PASSWORD}+ characters. A few unrelated words work well.</p>
       <form onSubmit={save} noValidate>
-        <PasswordField id="pw" label="New password" value={password} onChange={setPassword} meter
-          error={serverField ?? (tried && short ? `Too short. Use at least ${MIN_PASSWORD} characters.`
+        <PasswordField id="pw" label="New password" value={password} onChange={setPassword} meter placeholder="Enter a new password"
+          error={serverField ?? (tried && short ? `Too short. Use ${MIN_PASSWORD}+ characters.`
             : tooLong(password) ? "Too long (72 bytes at most)." : undefined)} />
-        <PasswordField id="pw2" label="Repeat new password" value={repeat} onChange={setRepeat}
+        <PasswordField id="pw2" label="Repeat new password" value={repeat} onChange={setRepeat} placeholder="Type the new password again"
           error={tried && mismatch ? "Passwords don't match" : undefined} />
         <button className="btn primary block" disabled={busy}>
           {busy ? <><LoaderCircle className="spin" />Saving…</> : "Save password"}

@@ -1,21 +1,22 @@
 "use client"
 
-import { Activity, Contact, RefreshCw, ShieldCheck, Users } from "lucide-react"
+import { Activity, CalendarDays, ChevronRight, MonitorSmartphone, RefreshCw, ScrollText, Users } from "lucide-react"
 import Link from "next/link"
 import { useCallback } from "react"
 
-import { Counter, LiveStatus } from "@/components/md/progress"
+import { LiveStatus } from "@/components/md/progress"
 import { useSession } from "@/components/md/session"
 import { ErrorState, LoadingState } from "@/components/md/states"
 import { usePoll } from "@/components/md/use-poll"
 import { api } from "@/lib/api"
+import { count } from "@/lib/table"
 import type { DashboardSummary } from "@/lib/types"
 import { Welcome } from "./welcome"
 
 /**
- * Start page (M2.4): only numbers the backend counts today, refreshed every
- * minute while the tab is visible. Modules that don't exist yet are shown as
- * "coming soon" tiles without any number.
+ * Start page: only numbers the backend counts today, refreshed every minute
+ * while the tab is visible. A strip of big numbers, then the team and the
+ * activity log. Nothing for modules that don't exist yet.
  */
 export function Dashboard() {
   const { can } = useSession()
@@ -25,60 +26,75 @@ export function Dashboard() {
 
   if (!allowed) return <Welcome />
   const s = p.data
+  const head = (
+    <div className="page-head">
+      <h1>Dashboard</h1>
+      <span className="meta"><LiveStatus status={p.status} updatedAt={p.updatedAt} failures={p.failures} /></span>
+      <div className="actions"><button className="btn" onClick={p.refresh}><RefreshCw />Refresh</button></div>
+    </div>
+  )
+  if (p.error && !s) return <>{head}<ErrorState title="Couldn't load the numbers" error={p.error} onRetry={p.refresh} /></>
+  if (!s) return <>{head}<div className="card"><LoadingState label="Loading dashboard numbers" /></div></>
+  const u = s.users
+  const share = (n: number) => `${u.total > 0 ? (n / u.total) * 100 : 0}%`
   return (
-    <div style={{ display: "grid", gap: 24 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-        <LiveStatus status={p.status} updatedAt={p.updatedAt} failures={p.failures} />
-        <button className="btn sm" style={{ marginLeft: "auto" }} onClick={p.refresh}><RefreshCw />Refresh</button>
+    <>
+      {head}
+      <div className="kpis">
+        <Kpi icon={<Users />} label="Accounts" value={u.total} meta="Owner included" />
+        <Kpi icon={<MonitorSmartphone />} label="Signed in now" value={s.openSessions} meta="Open sessions" />
+        <Kpi icon={<Activity />} label="Last 24 hours" value={s.activity.last24Hours} meta="Sign-ins, account changes, exports" />
+        <Kpi icon={<CalendarDays />} label="Last 7 days" value={s.activity.last7Days} meta="Activity across all users" />
       </div>
-      {p.error && !s ? <ErrorState title="Couldn't load the numbers" error={p.error} onRetry={p.refresh} /> : null}
-      {!s && !p.error && <div className="card"><LoadingState label="Loading dashboard numbers" /></div>}
-      {s && (
-        <>
-          <section className="card" aria-labelledby="dash-users">
-            <div className="card-head">
-              <Users style={{ color: "var(--muted-fg)" }} />
-              <h2 id="dash-users">Team</h2>
-              {can("USERS:VIEW") && <div className="right"><Link className="btn sm" href="/users">Users &amp; permissions</Link></div>}
-            </div>
-            <div className="card-pad counters">
-              <Counter label="Accounts" value={s.users.total} hint="Owner included" />
-              <Counter label="Active" value={s.users.active} tone="green" />
-              <Counter label="Invited" value={s.users.invited} tone="blue" hint="Not accepted yet" />
-              <Counter label="Disabled" value={s.users.disabled} tone="grey" />
-              <Counter label="Signed in now" value={s.openSessions} tone="primary" hint="Open sessions" />
-            </div>
-          </section>
-          <section className="card" aria-labelledby="dash-activity">
-            <div className="card-head">
-              <Activity style={{ color: "var(--muted-fg)" }} />
-              <h2 id="dash-activity">Activity log</h2>
-              {can("ACTIVITY_LOG:VIEW") && <div className="right"><Link className="btn sm" href="/activity">Open log</Link></div>}
-            </div>
-            <div className="card-pad counters">
-              <Counter label="Last 24 hours" value={s.activity.last24Hours} hint="Sign-ins, account changes, exports" />
-              <Counter label="Last 7 days" value={s.activity.last7Days} />
-            </div>
-          </section>
-        </>
-      )}
       <div className="grid-2">
-        <SoonTile icon={<Contact />} title="Contacts & lists" text="Imported contacts, lists and duplicates will be counted here." />
-        <SoonTile icon={<ShieldCheck />} title="Validation" text="Running jobs and results by category will show here." />
+        <section className="card" aria-labelledby="dash-users">
+          <div className="card-head">
+            <Users /><h2 id="dash-users">Team</h2>
+            {can("USERS:VIEW") && <Link className="link" href="/users">Users &amp; permissions<ChevronRight /></Link>}
+          </div>
+          <div className="card-pad">
+            <div className="sharebar" role="img" aria-label={`${u.active} active, ${u.invited} invited, ${u.disabled} disabled`}>
+              <span style={{ width: share(u.active), background: "var(--success)" }} />
+              <span style={{ width: share(u.invited), background: "var(--info)" }} />
+              <span style={{ width: share(u.disabled), background: "var(--grey-bd)" }} />
+            </div>
+            <div className="legend">
+              <LegendItem label="Active" value={u.active} color="var(--success)" />
+              <LegendItem label="Invited" value={u.invited} color="var(--info)" />
+              <LegendItem label="Disabled" value={u.disabled} color="var(--grey-bd)" />
+            </div>
+          </div>
+        </section>
+        <section className="card" aria-labelledby="dash-activity">
+          <div className="card-head">
+            <ScrollText /><h2 id="dash-activity">Activity log</h2>
+            {can("ACTIVITY_LOG:VIEW") && <Link className="link" href="/activity">Open log<ChevronRight /></Link>}
+          </div>
+          <div className="card-pad" style={{ display: "flex", gap: 40, flexWrap: "wrap" }}>
+            <div><div className="muted small">Last 24 hours</div><div className="kpi-v num">{count(s.activity.last24Hours)}</div></div>
+            <div><div className="muted small">Last 7 days</div><div className="kpi-v num">{count(s.activity.last7Days)}</div></div>
+          </div>
+        </section>
       </div>
+    </>
+  )
+}
+
+/** One number of the strip at the top: icon + label, big number, small grey line. No box (design direction 4.13). */
+function Kpi(props: { icon: React.ReactNode; label: string; value: number; meta: string }) {
+  return (
+    <div className="kpi" role="group" aria-label={props.label}>
+      <span className="kpi-l">{props.icon}{props.label}</span>
+      <span className="kpi-v num">{count(props.value)}</span>
+      <span className="kpi-m">{props.meta}</span>
     </div>
   )
 }
 
-function SoonTile(props: { icon: React.ReactNode; title: string; text: string }) {
+function LegendItem(props: { label: string; value: number; color: string }) {
   return (
-    <section className="card soon-tile" aria-label={`${props.title}: coming soon`}>
-      <div className="card-head">
-        <span style={{ color: "var(--muted-fg)", display: "grid" }}>{props.icon}</span>
-        <h2>{props.title}</h2>
-        <span className="soon-tag" style={{ marginLeft: "auto", display: "inline-block" }}>Coming soon</span>
-      </div>
-      <div className="card-pad"><p className="muted">{props.text}</p></div>
-    </section>
+    <span role="group" aria-label={props.label}>
+      <i style={{ background: props.color }} />{props.label} <b className="num">{count(props.value)}</b>
+    </span>
   )
 }

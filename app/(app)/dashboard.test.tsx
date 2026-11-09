@@ -45,14 +45,11 @@ describe("Dashboard", () => {
     expect(value("Last 7 days")).toBe("2,000")
   })
 
-  it("shows contacts and validation as coming soon, with no number", async () => {
+  it("shows no tiles for modules that don't exist yet", async () => {
     backend(["DASHBOARD:VIEW"])
     render(<SessionProvider><Dashboard /></SessionProvider>)
     await screen.findByRole("group", { name: "Accounts" })
-    for (const name of ["Contacts & lists: coming soon", "Validation: coming soon"]) {
-      const tile = screen.getByRole("region", { name })
-      expect(tile.textContent).not.toMatch(/\d/)
-    }
+    expect(screen.queryByText(/coming soon/i)).toBeNull()
   })
 
   it("without the permission: a welcome card and no call for numbers", async () => {

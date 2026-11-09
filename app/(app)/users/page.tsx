@@ -156,16 +156,15 @@ export default function UsersPage() {
   ]
 
   const data = t.data
+  // You don't see yourself in the list (your account is under My account).
+  const isMe = (u: UserItem) => u.publicId === me.publicId
+  const others = data ? data.totalItems - (!t.filtered || data.items.some(isMe) ? 1 : 0) : 0
   const status = t.filters.status ?? ""
   return (
     <>
-      <div className="subtabs">
-        <Link className="active" href="/users">Users</Link>
-        {can("ACTIVITY_LOG:VIEW") && <Link href="/activity">Activity log</Link>}
-      </div>
       <div className="page">
         <div className="page-head">
-          <h1>{data ? `${count(data.totalItems)} User${data.totalItems === 1 ? "" : "s"}` : "Users"}</h1>
+          <h1>{data ? `${count(others)} User${others === 1 ? "" : "s"}` : "Users"}</h1>
           {data && <span className="meta">{t.filtered ? "matching" : "in MasterDB"}</span>}
           <div className="actions">
             {can("USERS:CREATE") && (
@@ -188,6 +187,7 @@ export default function UsersPage() {
           columns={columns}
           rowKey={(u) => u.publicId}
           rowLabel={(u) => u.fullName}
+          hideRow={isMe}
           selectable={selectable}
           search={{ placeholder: "Search by name or email", label: "Search users" }}
           errorTitle="Couldn't load users"
@@ -217,7 +217,7 @@ export default function UsersPage() {
             </>
           )}
         />
-        <p className="help" style={{ marginTop: 12 }}>The Owner and your own row can&apos;t be selected: they can&apos;t be disabled or edited here.</p>
+        <p className="help" style={{ marginTop: 12 }}>The Owner can&apos;t be selected: owners can&apos;t be disabled or edited here.</p>
       </div>
 
       <ConfirmDialog open={!!confirm} onClose={() => setConfirm(null)} danger icon={<CircleSlash />}

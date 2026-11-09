@@ -93,19 +93,19 @@ export function ServerFields(props: {
         </div>
         <div className="field">
           <label className="label" htmlFor="srv-exp">VPS plan ends</label>
-          <input id="srv-exp" type="date" className={`input ${errors.expiresOn ? "invalid" : ""}`} value={v.expiresOn}
+          <input id="srv-exp" type="date" className={`input ${errors.expiresOn ? "invalid" : ""}`} value={v.expiresOn} placeholder="YYYY-MM-DD"
             onChange={set("expiresOn")} />
           {errors.expiresOn && <FieldError text={errors.expiresOn} />}
         </div>
         <div className="field">
           <label className="label" htmlFor="srv-port">SSH port</label>
-          <input id="srv-port" className={`input mono ${errors.sshPort ? "invalid" : ""}`} value={v.sshPort}
+          <input id="srv-port" className={`input mono ${errors.sshPort ? "invalid" : ""}`} value={v.sshPort} placeholder="22"
             onChange={set("sshPort")} inputMode="numeric" />
           {errors.sshPort && <FieldError text={errors.sshPort} />}
         </div>
         <div className="field">
           <label className="label" htmlFor="srv-user">SSH user</label>
-          <input id="srv-user" className={`input mono ${errors.sshUser ? "invalid" : ""}`} value={v.sshUser}
+          <input id="srv-user" className={`input mono ${errors.sshUser ? "invalid" : ""}`} value={v.sshUser} placeholder="root"
             onChange={set("sshUser")} autoComplete="off" spellCheck={false} />
           {errors.sshUser && <FieldError text={errors.sshUser} />}
           <span className="help">root, or a user with passwordless sudo (needed for the MTA).</span>
@@ -126,7 +126,7 @@ export function ServerFields(props: {
       ) : null}
       <div className="field" style={{ marginBottom: 0 }}>
         <label className="label" htmlFor="srv-notes">Notes (optional)</label>
-        <textarea id="srv-notes" className={`input ${errors.notes ? "invalid" : ""}`} rows={3} value={v.notes} onChange={set("notes")} />
+        <textarea id="srv-notes" className={`input ${errors.notes ? "invalid" : ""}`} rows={3} value={v.notes} placeholder="Anything worth remembering about this server" onChange={set("notes")} />
         {errors.notes && <FieldError text={errors.notes} />}
       </div>
     </>

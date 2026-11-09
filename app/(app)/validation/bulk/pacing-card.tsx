@@ -107,7 +107,7 @@ export function PacingCard() {
             ["block", "Pause after “blocked” (minutes)"], ["max", "Longest pause (minutes)"]] as const).map(([k, label]) => (
             <div className="field" key={k}>
               <label className="label" htmlFor={`p-${k}`}>{label}</label>
-              <input id={`p-${k}`} className="input" inputMode="decimal" value={form[k]} onChange={(e) => setForm({ ...form, [k]: e.target.value })} />
+              <input id={`p-${k}`} className="input" inputMode="decimal" value={form[k]} placeholder={label.includes("minutes") ? "Minutes" : "Seconds"} onChange={(e) => setForm({ ...form, [k]: e.target.value })} />
             </div>
           ))}
         </div>

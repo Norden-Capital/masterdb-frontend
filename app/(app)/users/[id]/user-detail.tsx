@@ -77,11 +77,6 @@ export function UserDetailView() {
 
   return (
     <>
-      <div className="subtabs">
-        <Link className="active" href="/users">Users</Link>
-        {can("ACTIVITY_LOG:VIEW") && <Link href="/activity">Activity log</Link>}
-        {u?.lastLoginAt && <span className="right muted small">Last login: {when(u.lastLoginAt)}</span>}
-      </div>
       <div className="page">
         <Link className="back" href="/users"><span className="round"><ArrowLeft /></span>Back to users</Link>
         {error ? (

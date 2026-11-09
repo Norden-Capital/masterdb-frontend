@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
 import {
-  ariaSort, clampPage, listParams, nextSort, pageRange, selectionState, sortArrow, toggleAll, toggleOne,
+  applyOrder, ariaSort, clampPage, moveColumn, listParams, nextSort, pageRange, selectionState, sortArrow, toggleAll, toggleOne,
 } from "./table.ts"
 
 describe("sorting", () => {
@@ -15,8 +15,8 @@ describe("sorting", () => {
 
   it("shows the direction only on the sorted column", () => {
     const s = { field: "name", dir: "desc" } as const
-    assert.equal(sortArrow(s, "name"), "↓")
-    assert.equal(sortArrow(s, "status"), "⇅")
+    assert.equal(sortArrow(s, "name"), "desc")
+    assert.equal(sortArrow(s, "status"), "unsorted")
     assert.equal(ariaSort(s, "name"), "descending")
     assert.equal(ariaSort(null, "name"), "none")
   })
@@ -66,5 +66,20 @@ describe("paging", () => {
     assert.equal(clampPage(4, 3), 2)
     assert.equal(clampPage(1, 3), 1)
     assert.equal(clampPage(5, 0), 0)
+  })
+})
+
+describe("column order", () => {
+  it("keeps the saved order, drops gone columns and adds new ones at the end", () => {
+    assert.deepEqual(applyOrder(["a", "b", "c"], null), ["a", "b", "c"])
+    assert.deepEqual(applyOrder(["a", "b", "c"], ["c", "a"]), ["c", "a", "b"])
+    assert.deepEqual(applyOrder(["a", "b"], ["x", "b", "a"]), ["b", "a"])
+  })
+
+  it("moves a column to the place of another, either way", () => {
+    assert.deepEqual(moveColumn(["a", "b", "c", "d"], "c", "a"), ["c", "a", "b", "d"])
+    assert.deepEqual(moveColumn(["a", "b", "c", "d"], "a", "c"), ["b", "c", "a", "d"])
+    assert.deepEqual(moveColumn(["a", "b"], "a", "a"), ["a", "b"])
+    assert.deepEqual(moveColumn(["a", "b"], "a", "zz"), ["a", "b"])
   })
 })

@@ -177,13 +177,13 @@ function AccountForm(props: { open: boolean; onClose: () => void; account: Namec
       submitLabel={adding ? "Add account" : "Save"} canSubmit={apiUser.trim() !== "" && (!adding || apiKey.trim() !== "")}>
       <div className="field">
         <label className="label" htmlFor="nc-user">API user</label>
-        <input id="nc-user" className={`input ${fieldErr?.field("apiUser") ? "invalid" : ""}`} value={apiUser}
+        <input id="nc-user" className={`input ${fieldErr?.field("apiUser") ? "invalid" : ""}`} value={apiUser} placeholder="Namecheap API user"
           autoComplete="off" spellCheck={false} onChange={(e) => setApiUser(e.target.value)} />
         {fieldErr?.field("apiUser") && <FieldError text={fieldErr.field("apiUser")!} />}
       </div>
       <div className="field">
         <label className="label" htmlFor="nc-username">Username <span className="muted">(optional, usually the API user)</span></label>
-        <input id="nc-username" className={`input ${fieldErr?.field("username") ? "invalid" : ""}`} value={username}
+        <input id="nc-username" className={`input ${fieldErr?.field("username") ? "invalid" : ""}`} value={username} placeholder="Namecheap username"
           autoComplete="off" spellCheck={false} onChange={(e) => setUsername(e.target.value)} />
         {fieldErr?.field("username") && <FieldError text={fieldErr.field("username")!} />}
       </div>

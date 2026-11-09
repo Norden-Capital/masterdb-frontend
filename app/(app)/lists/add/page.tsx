@@ -125,7 +125,7 @@ export default function AddListPage() {
         <div className="grid-2" style={{ gap: "0 16px" }}>
           <div className="field">
             <label className="label" htmlFor="l-name">List name</label>
-            <input id="l-name" className={`input ${errors.name ? "invalid" : ""}`} maxLength={255} value={form.name} onChange={set("name")} disabled={busy} />
+            <input id="l-name" className={`input ${errors.name ? "invalid" : ""}`} maxLength={255} value={form.name} placeholder="e.g. Expo 2026 attendees" onChange={set("name")} disabled={busy} />
             {errors.name && <FieldError text={errors.name} />}
           </div>
           <div className="field">
@@ -134,7 +134,7 @@ export default function AddListPage() {
           </div>
           <div className="field">
             <label className="label" htmlFor="l-country">Country</label>
-            <input id="l-country" className="input" maxLength={255} value={form.country} onChange={set("country")} disabled={busy} />
+            <input id="l-country" className="input" maxLength={255} value={form.country} placeholder="e.g. Canada" onChange={set("country")} disabled={busy} />
           </div>
           <div className="field">
             <label className="label" htmlFor="l-dup">Remove duplicates</label>
@@ -150,7 +150,7 @@ export default function AddListPage() {
           </div>
           <div className="field">
             <label className="label" htmlFor="l-split">Split by number</label>
-            <input id="l-split" className={`input ${errors.splitBy ? "invalid" : ""}`} type="number" min={0} step={1} value={form.splitBy} onChange={set("splitBy")} disabled={busy} />
+            <input id="l-split" className={`input ${errors.splitBy ? "invalid" : ""}`} type="number" min={0} step={1} value={form.splitBy} placeholder="0 = one part" onChange={set("splitBy")} disabled={busy} />
             {errors.splitBy ? <FieldError text={errors.splitBy} /> : <span className="help">0 keeps one part; a larger number makes parts of that many addresses, each validated on its own.</span>}
           </div>
         </div>

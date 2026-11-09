@@ -21,10 +21,15 @@ npm run build
   and refuses cross-site writes with 403 `CSRF_REJECTED` (`lib/proxy-guards.ts`).
 - **`proxy.ts`** (Next 16's name for middleware): pages behind the login without the
   `md_session` cookie go to `/login?next=...`. Only an optimistic check; the backend decides.
-- **Design**: `app/md.css` is the approved mock stylesheet (`graphic/mocks/auth/assets/app.css`)
-  ported 1:1: tokens for light and dark (`<html data-theme>`, set before paint from the saved
-  choice or the system), plain component classes (`.btn`, `.card`, `.t`, `.pill`, ...).
-  Font: Plus Jakarta Sans. Icons: lucide-react.
+- **Design**: `app/md.css` holds the tokens and component classes (plan/design-direction.md); its last
+  section ("Design pass") is the 2026-11-09 look: light theme only (dark tokens kept for later), a 64px
+  icon rail with one item per module, the module's pages as tabs under the top bar, a bottom tab bar
+  on phones, the user's name linking to My account and a log-out icon with a confirm (shadcn
+  AlertDialog, `components/ui/alert-dialog.tsx`). The sign-in pages, 403 and 404 use a near-black
+  look with orange buttons (`.am`); their errors show as toasts. Tables: drag a header to move a
+  column (kept per table in the browser), chevrons for sorting, the card fills the page height.
+  `app/globals.css` maps the shadcn colour names to the same palette. Font: Plus Jakarta Sans.
+  Icons: lucide-react.
 - **Pages** (`app/(auth)` public, `app/(app)` behind the login with the app frame):
 
   | Mock | Route |

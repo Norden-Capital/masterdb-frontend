@@ -1,15 +1,15 @@
 "use client"
 
-import { Check, Copy, Download, LoaderCircle } from "lucide-react"
+import { Copy, Download, Info, KeyRound, LoaderCircle, TimerOff } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import QRCode from "qrcode"
 import { useEffect, useRef, useState } from "react"
 
-import { AuthCard } from "@/components/md/auth-card"
+import { AuthCard, useErrorToast } from "@/components/md/auth-card"
 import { takeReturn } from "@/components/md/session"
 import { useToast } from "@/components/md/toast"
-import { Banner, OtpInput, downloadText } from "@/components/md/ui"
+import { OtpInput, Stepper, downloadText } from "@/components/md/ui"
 import { api, ApiError, describe } from "@/lib/api"
 import type { LoginResponse } from "@/lib/types"
 
@@ -60,12 +60,15 @@ export default function TwoFactorSetupPage() {
   }
 
   const err = error instanceof ApiError ? error.code : error ? "OTHER" : null
+  useErrorToast(error, err && !["INVALID_TWO_FACTOR_CODE", "LOGIN_CHALLENGE_INVALID"].includes(err) ? `Something went wrong. ${describe(error)}` : null)
   if (err === "LOGIN_CHALLENGE_INVALID") {
     return (
       <AuthCard center>
+        <div className="icon-badge orange"><TimerOff /></div>
         <h1>Your setup step expired</h1>
-        <p className="lead">Setting up two-factor must be done within 10 minutes of logging in. Log in again to restart it.</p>
+        <p className="lead">Log in again to restart it.</p>
         <Link className="btn primary block" href="/login">Log in again</Link>
+        <p className="help" style={{ marginTop: 14 }}>Two-factor must be set up within 10 minutes of logging in.</p>
       </AuthCard>
     )
   }
@@ -73,19 +76,12 @@ export default function TwoFactorSetupPage() {
   const text = codes.join("\n")
   return (
     <AuthCard wide>
-      <div className="steps">
-        <span className={step === "scan" ? "cur" : "done"}>{step === "scan" ? "1 · Scan" : <><Check size={14} />Scan</>}</span>
-        <span className={step === "confirm" ? "cur" : step === "codes" ? "done" : ""}>
-          {step === "codes" ? <><Check size={14} />Confirm</> : "2 · Confirm"}
-        </span>
-        <span className={step === "codes" ? "cur" : ""}>3 · Save codes</span>
-      </div>
-      {err && !["INVALID_TWO_FACTOR_CODE"].includes(err) && <Banner tone="red" title="Something went wrong">{describe(error)}</Banner>}
+      <Stepper label="Setup steps" steps={["Scan", "Confirm", "Save codes"]} current={step === "scan" ? 0 : step === "confirm" ? 1 : 2} />
 
       {step === "scan" && (
         <div>
           <h1>Protect your account</h1>
-          <p className="lead">Two-factor is required for everyone. Scan this code with Google Authenticator, 1Password, Authy or similar.</p>
+          <p className="lead">Scan this code with your authenticator app.</p>
           <div className="qr" aria-label="QR code for your authenticator app" role="img"
             dangerouslySetInnerHTML={{ __html: qr }} />
           {setup && (
@@ -100,17 +96,18 @@ export default function TwoFactorSetupPage() {
           <button className="btn primary block" style={{ marginTop: 24 }} disabled={!setup} onClick={() => setStep("confirm")}>
             I&apos;ve scanned it
           </button>
+          <p className="help" style={{ marginTop: 14 }}>Two-factor is required for everyone. Google Authenticator, 1Password or Authy all work.</p>
         </div>
       )}
 
       {step === "confirm" && (
         <form onSubmit={(e) => { e.preventDefault(); if (code.length === 6) confirm(code) }}>
           <h1>Confirm with a code</h1>
-          <p className="lead">Type the 6-digit code your app shows now, to prove the setup works.</p>
+          <p className="lead">Type the code your app shows now.</p>
           <OtpInput value={code} onChange={setCode} onComplete={confirm} invalid={err === "INVALID_TWO_FACTOR_CODE"} disabled={busy} />
           {err === "INVALID_TWO_FACTOR_CODE" && (
             <p className="err" style={{ justifyContent: "center", marginTop: 10 }} role="alert">
-              That code didn&apos;t match. Check your phone&apos;s clock and try the next code.
+              Wrong code. Check your phone&apos;s clock.
             </p>
           )}
           <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
@@ -125,18 +122,27 @@ export default function TwoFactorSetupPage() {
       {step === "codes" && (
         <div>
           <h1>Save your recovery codes</h1>
-          <p className="lead">If you lose your phone, each code lets you in once. Store them somewhere safe, like a password manager. You won&apos;t see them again.</p>
-          <div className="codes">{codes.map((c) => <span key={c}>{c}</span>)}</div>
-          <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-            <button className="btn" style={{ flex: 1 }} onClick={() => navigator.clipboard.writeText(text).then(() => toast(`${codes.length} codes copied`))}>
-              <Copy />Copy
-            </button>
-            <button className="btn" style={{ flex: 1 }} onClick={() => downloadText("masterdb-recovery-codes.txt", `MasterDB recovery codes\n\n${text}\n`)}>
-              <Download />Download .txt
-            </button>
+          <p className="lead">Keep them safe. You won&apos;t see them again.</p>
+          <div className="codes-card">
+            <div className="codes-head">
+              <span><KeyRound />{codes.length} recovery codes</span>
+              <span className="codes-actions">
+                <button className="icon-btn" title="Copy all codes" aria-label="Copy all codes"
+                  onClick={() => navigator.clipboard.writeText(text).then(() => toast(`${codes.length} codes copied`))}><Copy /></button>
+                <button className="icon-btn" title="Download as .txt" aria-label="Download as .txt"
+                  onClick={() => downloadText("masterdb-recovery-codes.txt", `MasterDB recovery codes
+
+${text}
+`)}><Download /></button>
+              </span>
+            </div>
+            <ol className="codes-list">
+              {codes.map((c, i) => <li key={c}><span className="n">{String(i + 1).padStart(2, "0")}</span><code>{c}</code></li>)}
+            </ol>
           </div>
-          <label className="check" style={{ margin: "20px 0" }}>
-            <input type="checkbox" className="cb" checked={saved} onChange={(e) => setSaved(e.target.checked)} /> I&apos;ve saved my recovery codes
+          <p className="help codes-note"><Info />Each code lets you in once if you lose your phone.</p>
+          <label className="confirm-row">
+            <input type="checkbox" className="cb" checked={saved} onChange={(e) => setSaved(e.target.checked)} /> I&apos;ve saved these codes somewhere safe
           </label>
           <button className="btn primary block" disabled={!saved} onClick={() => router.replace(takeReturn())}>
             Finish and open MasterDB

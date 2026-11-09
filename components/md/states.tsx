@@ -1,48 +1,41 @@
 "use client"
 
-import { LockKeyhole, MapPinOff } from "lucide-react"
+import { ChevronLeft, CircleAlert, LockKeyhole, MapPinOff, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
+import { AuthCard } from "@/components/md/auth-card"
 import { Banner } from "@/components/md/ui"
 import { describe } from "@/lib/api"
 
-/** 403 page body (mock 14). */
+/** 403: a full screen over the app (no frame), in the sign-in look. */
 export function Forbidden({ module }: { module: string }) {
   return (
-    <div className="page" style={{ display: "grid", placeItems: "center", minHeight: "calc(100vh - 60px)", paddingBottom: 60 }}>
-      <div className="card" style={{ width: "min(520px,100%)" }}>
-        <div className="empty">
-          <div className="ic" style={{ background: "var(--amber-bg)", color: "var(--amber-fg)" }}><LockKeyhole /></div>
-          <p className="small muted" style={{ letterSpacing: ".06em", textTransform: "uppercase" }}>Error 403</p>
-          <h3 style={{ fontSize: 20 }}>You don&apos;t have access to {module}</h3>
-          <p>Your permissions don&apos;t include this module. If you need it, ask an Owner to update your permissions.</p>
-          <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap", justifyContent: "center" }}>
-            <Link className="btn" href="/account">See my permissions</Link>
-            <Link className="btn primary" href="/">Go to dashboard</Link>
-          </div>
-        </div>
-      </div>
+    <div className="full-screen">
+      <AuthCard center>
+        <div className="icon-badge orange"><LockKeyhole /></div>
+        <h1>You don&apos;t have access</h1>
+        <p className="lead">Your permissions don&apos;t include {module}.</p>
+        <Link className="btn primary block" href="/">Go to dashboard</Link>
+        <p className="help" style={{ marginTop: 14 }}>Need it? Ask an Owner to update your permissions.</p>
+      </AuthCard>
     </div>
   )
 }
 
-/** 404 page body (mock 14). */
+/** 404: the same full screen. */
 export function NotFoundBody() {
   const router = useRouter()
   return (
-    <div className="card" style={{ width: "min(520px,100%)" }}>
-      <div className="empty">
-        <div className="ic"><MapPinOff /></div>
-        <p className="small muted" style={{ letterSpacing: ".06em", textTransform: "uppercase" }}>Error 404</p>
-        <h3 style={{ fontSize: 20 }}>Page not found</h3>
-        <p>This page doesn&apos;t exist or was moved. If you followed a link, it may be out of date.</p>
-        <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap", justifyContent: "center" }}>
-          <button className="btn" onClick={() => router.back()}>Go back</button>
-          <Link className="btn primary" href="/">Go to dashboard</Link>
-        </div>
-      </div>
-    </div>
+    <AuthCard center>
+      <div className="icon-badge orange"><MapPinOff /></div>
+      <h1>Page not found</h1>
+      <p className="lead">This page doesn&apos;t exist or was moved.</p>
+      <Link className="btn primary block" href="/">Go to dashboard</Link>
+      <p className="help" style={{ marginTop: 14 }}>
+        <button className="link-btn go-back" onClick={() => router.back()}><ChevronLeft />Go back</button>
+      </p>
+    </AuthCard>
   )
 }
 
@@ -80,6 +73,18 @@ export function ErrorState(props: { title: string; error: unknown; onRetry?: () 
       {describe(props.error)}{" "}
       {props.onRetry && <button className="link-btn" onClick={props.onRetry}>Try again</button>}
     </Banner>
+  )
+}
+
+/** A failed load inside a table card: centred like the empty state, red icon, reason and "Try again". */
+export function ErrorBlock(props: { title: string; error: unknown; onRetry?: () => void }) {
+  return (
+    <div className="empty err-state" role="alert">
+      <div className="ic"><CircleAlert /></div>
+      <h3>{props.title}</h3>
+      <p>{describe(props.error)}</p>
+      {props.onRetry && <button className="btn" onClick={props.onRetry}><RefreshCw />Try again</button>}
+    </div>
   )
 }
 

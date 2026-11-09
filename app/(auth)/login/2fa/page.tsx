@@ -1,14 +1,13 @@
 "use client"
 
-import { LoaderCircle } from "lucide-react"
+import { LoaderCircle, TimerOff } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
-import { AuthCard, BackToLogin } from "@/components/md/auth-card"
+import { AuthCard, BackToLogin, useErrorToast } from "@/components/md/auth-card"
 import { takeReturn } from "@/components/md/session"
-import { Banner, FieldError } from "@/components/md/ui"
-import { OtpInput } from "@/components/md/ui"
+import { FieldError, OtpInput, RecoveryCodeInput } from "@/components/md/ui"
 import { api, ApiError, describe, wait } from "@/lib/api"
 
 /** Mock 02: the authenticator code, or a recovery code. */
@@ -39,12 +38,18 @@ export default function TwoFactorPage() {
   }
 
   const err = error instanceof ApiError ? error.code : error ? "OTHER" : null
+  useErrorToast(error,
+    err === "ACCOUNT_LOCKED" ? `Account locked. Try again in ${wait((error as ApiError).retryAfter)}.`
+      : err === "RATE_LIMITED" ? `Too many attempts. ${describe(error)}`
+        : err && !["INVALID_TWO_FACTOR_CODE", "LOGIN_CHALLENGE_INVALID"].includes(err) ? `Couldn't check the code. ${describe(error)}`
+          : null)
 
   if (err === "LOGIN_CHALLENGE_INVALID") {
     return (
       <AuthCard center>
+        <div className="icon-badge orange"><TimerOff /></div>
         <h1>Your sign-in expired</h1>
-        <p className="lead">The code step lasts 10 minutes. Log in again with your password.</p>
+        <p className="lead">The code step lasts 10 minutes.</p>
         <Link className="btn primary block" href="/login">Log in again</Link>
       </AuthCard>
     )
@@ -52,23 +57,14 @@ export default function TwoFactorPage() {
 
   return (
     <AuthCard foot={<BackToLogin />}>
-      {err === "ACCOUNT_LOCKED" && (
-        <Banner tone="amber" title="Account temporarily locked">
-          Too many wrong codes. Try again in {wait((error as ApiError).retryAfter)}.
-        </Banner>
-      )}
-      {err === "RATE_LIMITED" && <Banner tone="amber" title="Too many attempts">{describe(error)}</Banner>}
-      {err && !["ACCOUNT_LOCKED", "RATE_LIMITED", "INVALID_TWO_FACTOR_CODE"].includes(err) && (
-        <Banner tone="red" title="Couldn't check the code">{describe(error)}</Banner>
-      )}
       {mode === "code" ? (
         <form onSubmit={(e) => { e.preventDefault(); if (code.length === 6) verify(code) }}>
           <h1>Enter your code</h1>
-          <p className="lead">Open your authenticator app and type the 6-digit code for MasterDB.</p>
+          <p className="lead">Enter the 6-digit code from your app.</p>
           <OtpInput value={code} onChange={setCode} onComplete={verify} invalid={err === "INVALID_TWO_FACTOR_CODE"} disabled={busy} />
           {err === "INVALID_TWO_FACTOR_CODE" && (
             <p className="err" style={{ justifyContent: "center", marginTop: 10 }} role="alert">
-              That code didn&apos;t work. Codes change every 30 seconds.
+              Wrong code. Try the next one.
             </p>
           )}
           <div style={{ marginTop: 24 }}>
@@ -85,14 +81,13 @@ export default function TwoFactorPage() {
       ) : (
         <form onSubmit={(e) => { e.preventDefault(); verify(recovery) }}>
           <h1>Use a recovery code</h1>
-          <p className="lead">Type one of the recovery codes you saved when you set up two-factor. Each code works once.</p>
+          <p className="lead">Each saved recovery code works once.</p>
           <div className="field">
-            <label className="label" htmlFor="rc">Recovery code</label>
-            <input id="rc" className={`input mono ${err === "INVALID_TWO_FACTOR_CODE" ? "invalid" : ""}`} placeholder="xxxxx-xxxxx"
-              autoComplete="off" value={recovery} onChange={(e) => setRecovery(e.target.value)} autoFocus />
-            {err === "INVALID_TWO_FACTOR_CODE" && <FieldError text="That code is not valid or was already used." />}
+            <span className="label" style={{ textAlign: "center" }}>Recovery code</span>
+            <div><RecoveryCodeInput value={recovery} onChange={setRecovery} invalid={err === "INVALID_TWO_FACTOR_CODE"} disabled={busy} /></div>
+            {err === "INVALID_TWO_FACTOR_CODE" && <div style={{ display: "flex", justifyContent: "center" }}><FieldError text="Not valid, or already used." /></div>}
           </div>
-          <button className="btn primary block" type="submit" disabled={busy || recovery.trim().length < 10}>
+          <button className="btn primary block" type="submit" disabled={busy || recovery.replace("-", "").length < 10}>
             {busy ? <><LoaderCircle className="spin" />Checking…</> : "Verify"}
           </button>
           <p style={{ marginTop: 20, textAlign: "center" }}>

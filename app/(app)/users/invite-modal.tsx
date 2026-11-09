@@ -1,16 +1,16 @@
 "use client"
 
-import { ChevronDown, LoaderCircle, Send, SlidersHorizontal, UserPlus } from "lucide-react"
+import { ChevronDown, LoaderCircle, Send, SlidersHorizontal } from "lucide-react"
 import { useState } from "react"
 
 import { PermissionGrid, allPermissions } from "@/components/md/permission-grid"
 import { useSession } from "@/components/md/session"
 import { useToast } from "@/components/md/toast"
-import { Banner, FieldError, Modal } from "@/components/md/ui"
+import { Banner, FieldError, Sheet } from "@/components/md/ui"
 import { api, ApiError, describe } from "@/lib/api"
 import type { Catalogue } from "@/lib/types"
 
-/** Mock 08: invite by email, start from a template, adjust the grid. */
+/** Invite by email, start from a template, adjust the grid. Opens as a side sheet over the users list. */
 export function InviteModal(props: { open: boolean; onClose: () => void; onSent: () => void; catalogue: Catalogue | null }) {
   const { can } = useSession()
   const toast = useToast()
@@ -54,14 +54,14 @@ export function InviteModal(props: { open: boolean; onClose: () => void; onSent:
   const conflict = error instanceof ApiError && error.code === "CONFLICT"
   const emailError = error instanceof ApiError ? error.field("email") : undefined
   return (
-    <Modal open={props.open} onClose={close} size="wide" icon={<UserPlus />} title="Invite user"
-      text="They'll get an email to set a password and two-factor. The invite expires in 72 hours."
+    <Sheet open={props.open} onClose={close} title="Invite user"
       footer={<>
         <button className="btn" onClick={close}>Cancel</button>
         <button className="btn primary" onClick={send} disabled={busy || !email.includes("@") || notMine.length > 0}>
           {busy ? <><LoaderCircle className="spin" />Sending…</> : <><Send />Send invite</>}
         </button>
       </>}>
+      <p className="muted" style={{ marginBottom: 18 }}>They get an email to set a password and two-factor. The invite expires in 72 hours.</p>
       {conflict && <Banner tone="red" title="This email can't be invited">{(error as ApiError).detail}</Banner>}
       {error && !conflict && !emailError ? <Banner tone="red" title="Couldn't send the invite">{describe(error)}</Banner> : null}
       {notMine.length > 0 && (
@@ -105,6 +105,6 @@ export function InviteModal(props: { open: boolean; onClose: () => void; onSent:
           <PermissionGrid catalogue={catalogue} value={value} onChange={setPerms} grantable={can} />
         </details>
       )}
-    </Modal>
+    </Sheet>
   )
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 
-import { BackendStatus } from "@/components/backend-status"
 import { Dashboard } from "./dashboard"
 
 export const metadata: Metadata = { title: "Dashboard" }
@@ -9,10 +8,6 @@ export const metadata: Metadata = { title: "Dashboard" }
 export default function Home() {
   return (
     <div className="page">
-      <div className="page-head">
-        <h1>Dashboard</h1>
-        <span className="meta"><BackendStatus /></span>
-      </div>
       <Dashboard />
     </div>
   )

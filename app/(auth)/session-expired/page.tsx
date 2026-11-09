@@ -12,9 +12,9 @@ export default function SessionExpiredPage() {
     <AuthCard center>
       <div className="icon-badge orange"><TimerOff /></div>
       <h1>Your session expired</h1>
-      <p className="lead">You were inactive for a while, or signed out elsewhere, so we logged you out to keep the data safe. Running jobs keep going.</p>
+      <p className="lead">You were logged out after a while away.</p>
       <Link className="btn primary block" href="/login">Log in again</Link>
-      <p className="help" style={{ marginTop: 14 }}>You&apos;ll come back to the page you were on.</p>
+      <p className="help" style={{ marginTop: 14 }}>Or you signed out elsewhere. Running jobs keep going, and you&apos;ll come back to the page you were on.</p>
     </AuthCard>
   )
 }

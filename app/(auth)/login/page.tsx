@@ -1,13 +1,13 @@
 "use client"
 
-import { LoaderCircle, LockKeyhole, Mail } from "lucide-react"
+import { LoaderCircle, Mail } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
-import { AuthCard } from "@/components/md/auth-card"
+import { AuthCard, useErrorToast } from "@/components/md/auth-card"
 import { rememberReturn } from "@/components/md/session"
-import { Banner, FieldError, PasswordField } from "@/components/md/ui"
+import { FieldError, PasswordField } from "@/components/md/ui"
 import { api, ApiError, describe, wait } from "@/lib/api"
 import type { LoginResponse } from "@/lib/types"
 
@@ -51,27 +51,17 @@ export default function LoginPage() {
   const code = error instanceof ApiError ? error.code : null
   const mmss = `${Math.floor(lockedFor / 60)}:${String(lockedFor % 60).padStart(2, "0")}`
 
+  const mins = (sec?: number | null) => `${Math.floor((sec ?? 900) / 60)}:${String((sec ?? 900) % 60).padStart(2, "0")}`
+  useErrorToast(error,
+    code === "ACCOUNT_LOCKED" ? `Account locked. Try again in ${mins((error as ApiError).retryAfter)} or reset your password.`
+      : code === "RATE_LIMITED" ? `Too many attempts. Wait ${wait((error as ApiError).retryAfter)}, then try again.`
+        : error && !["INVALID_CREDENTIALS", "VALIDATION_FAILED"].includes(code ?? "") ? `Couldn't log in. ${describe(error)}`
+          : null)
+
   return (
-    <AuthCard foot="Access is by invitation only. Ask an Owner for an invite.">
-      <h1>Log in</h1>
-      <p className="lead">Welcome back. Use your Norden Capital account.</p>
-      {code === "INVALID_CREDENTIALS" && (
-        <Banner tone="red" title="Email or password is incorrect">
-          Check both and try again. After 5 wrong attempts the account is locked for 15 minutes.
-        </Banner>
-      )}
-      {code === "ACCOUNT_LOCKED" && lockedFor > 0 && (
-        <Banner tone="amber" icon={<LockKeyhole />} title="Account temporarily locked">
-          Too many failed attempts. Try again in <span className="num">{mmss}</span>, or{" "}
-          <Link href="/forgot-password">reset your password</Link>.
-        </Banner>
-      )}
-      {code === "RATE_LIMITED" && (
-        <Banner tone="amber" title="Too many attempts">Wait {wait((error as ApiError).retryAfter)} and try again.</Banner>
-      )}
-      {error && !["INVALID_CREDENTIALS", "ACCOUNT_LOCKED", "RATE_LIMITED", "VALIDATION_FAILED"].includes(code ?? "") && (
-        <Banner tone="red" title="Couldn't log in">{describe(error)}</Banner>
-      )}
+    <AuthCard foot={<>Two-factor sign-in is required for every account.<br />Need access? Ask an Owner for an invite.</>}>
+      <h1>Welcome to MasterDB</h1>
+      <p className="lead">Log in with your Norden Capital account.</p>
       <form onSubmit={submit} noValidate>
         <div className="field">
           <label className="label" htmlFor="email">Email</label>
@@ -83,13 +73,13 @@ export default function LoginPage() {
         </div>
         <div className="label-row" style={{ marginBottom: -22, position: "relative", zIndex: 1 }}>
           <span />
-          <Link href="/forgot-password" className="small">Forgot password?</Link>
+          <Link href="/forgot-password">Forgot password?</Link>
         </div>
         <PasswordField id="password" label="Password" value={password} onChange={setPassword}
-          autoComplete="current-password" />
+          autoComplete="current-password" placeholder="Enter your password" />
         {code === "INVALID_CREDENTIALS" && <div style={{ marginTop: -10, marginBottom: 12 }}><FieldError text="Email or password is incorrect" /></div>}
         <button className="btn primary block" type="submit" disabled={busy || lockedFor > 0 || !email || !password}>
-          {busy ? <><LoaderCircle className="spin" />Logging in…</> : "Log in"}
+          {busy ? <><LoaderCircle className="spin" />Logging in…</> : lockedFor > 0 ? <>Locked · <span className="num">{mmss}</span></> : "Log in"}
         </button>
       </form>
     </AuthCard>

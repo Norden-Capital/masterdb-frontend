@@ -108,10 +108,6 @@ export function PermissionsEditor() {
 
   return (
     <>
-      <div className="subtabs">
-        <Link className="active" href="/users">Users</Link>
-        {can("ACTIVITY_LOG:VIEW") && <Link href="/activity">Activity log</Link>}
-      </div>
       <div className="page">
         <Link className="back" href={`/users/${id}`} onClick={back}><span className="round"><ArrowLeft /></span>Back to {u?.fullName ?? "user"}</Link>
         {error ? <Banner tone="red" title="Couldn't load the permissions">{describe(error)}</Banner> : null}

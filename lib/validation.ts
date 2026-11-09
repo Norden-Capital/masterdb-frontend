@@ -32,6 +32,7 @@ export function duration(ms: number): string {
 
 
 const JOB_STATUS: Record<JobStatus, { label: string; tone: "blue" | "amber" | "green" }> = {
+  PREPARING: { label: "Preparing", tone: "blue" },
   RUNNING: { label: "Running", tone: "blue" },
   STOPPED: { label: "Stopped", tone: "amber" },
   COMPLETED: { label: "Done", tone: "green" },
@@ -39,6 +40,11 @@ const JOB_STATUS: Record<JobStatus, { label: string; tone: "blue" | "amber" | "g
 
 export function jobStatus(s: JobStatus): { label: string; tone: "blue" | "amber" | "green" | "grey" } {
   return JOB_STATUS[s] ?? { label: s, tone: "grey" }
+}
+
+/** Still working on the server: copying the list's addresses, or checking them. */
+export function jobActive(s: JobStatus): boolean {
+  return s === "RUNNING" || s === "PREPARING"
 }
 
 /** The job's six counters, keyed by category. */

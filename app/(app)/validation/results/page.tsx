@@ -27,7 +27,7 @@ export default function ValidationResultsPage() {
     {
       key: "name", header: "Job", className: "cell2",
       render: (j) => <><b><Link href={`/validation/results/${j.publicId}`} style={{ color: "inherit" }}>{j.name}</Link></b>
-        <span>{when(j.startedAt)}{j.startedBy ? ` · ${j.startedBy}` : ""}</span></>,
+        <span>{when(j.startedAt)}{j.startedBy ? ` · ${j.startedBy}` : ""}{j.source === "LIST" ? " · from a list" : ""}</span></>,
     },
     { key: "status", header: "Status", render: (j) => { const s = jobStatus(j.status); return <span className={`pill ${s.tone}`}>{s.label}</span> } },
     { key: "checked", header: "Checked", className: "num", render: (j) => `${count(j.checked)} of ${count(j.total)}` },
@@ -58,6 +58,7 @@ export default function ValidationResultsPage() {
       <div className="toolbar">
         <select className={`filter ${status ? "on" : ""}`} aria-label="Status" value={status} onChange={(e) => t.setFilter("status", e.target.value)}>
           <option value="">Status: All</option>
+          <option value="PREPARING">Status: Preparing</option>
           <option value="RUNNING">Status: Running</option>
           <option value="STOPPED">Status: Stopped</option>
           <option value="COMPLETED">Status: Done</option>

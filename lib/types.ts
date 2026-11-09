@@ -343,7 +343,8 @@ export type CheckResult = {
   createdAt: string
 }
 
-export type JobStatus = "RUNNING" | "STOPPED" | "COMPLETED"
+/** PREPARING: a job on a list while its addresses are copied from the list on the server. */
+export type JobStatus = "PREPARING" | "RUNNING" | "STOPPED" | "COMPLETED"
 
 /** One server of a bulk job; state/message only while the job runs. */
 export type JobServer = { publicId: string; name: string; ip: string; checked: number; state?: string; message?: string }
@@ -373,6 +374,8 @@ export type ValidationJob = {
   createdAt: string
   startedAt: string
   finishedAt?: string
+  /** source LIST: the list (or part) it came from; no publicId once the list was deleted. */
+  list?: { publicId?: string; name?: string; part?: number }
 }
 
 /** One address of a job, or its latest result in List status. category absent = still to check. */

@@ -14,6 +14,7 @@ import { api, describe } from "@/lib/api"
 import { when } from "@/lib/format"
 import { type ListFacets, type ListItem, listStatus } from "@/lib/lists"
 import { count } from "@/lib/table"
+import { ValidateListButton } from "../validate-actions"
 import { ValidationSummary } from "../validation-summary"
 
 /** List emails: every list with its records and details, search, filters, delete. */
@@ -75,6 +76,7 @@ export default function ListsPage() {
     { key: "source", header: "Source", sortField: "source", render: (l) => <span className="pill grey">{l.source === "DRIVE" ? "Google Drive" : "Local file"}</span> },
     { key: "validation", header: "Latest validation", render: (l) => l.status === "READY" ? <ValidationSummary list={l} compact /> : <span className="muted">—</span> },
     { key: "created", header: "Created", sortField: "createdAt", render: (l) => when(l.createdAt) },
+    { key: "actions", header: "", render: (l) => <ValidateListButton list={l} small /> },
   ]
 
   const f = t.filters

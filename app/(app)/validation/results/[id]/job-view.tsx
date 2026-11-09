@@ -18,7 +18,7 @@ import { api } from "@/lib/api"
 import { dayLabel, timeWithSeconds, when } from "@/lib/format"
 import { count } from "@/lib/table"
 import type { EmailResult, ValidationJob } from "@/lib/types"
-import { CATEGORIES, categoryMeta, jobCounts, jobStatus, serverState } from "@/lib/validation"
+import { CATEGORIES, categoryMeta, jobActive, jobCounts, jobStatus, serverState } from "@/lib/validation"
 import { CategoryPill } from "../../category-pill"
 import { CategoryRing } from "../../category-ring"
 
@@ -37,7 +37,7 @@ export function JobView() {
   const [busy, setBusy] = useState(false)
   const poll = usePoll<ValidationJob>(
     (signal) => api<ValidationJob>(`/api/v1/validation/jobs/${id}`, { signal }),
-    { interval: 2000, enabled: can("VALIDATION:VIEW"), isDone: (j) => j.status !== "RUNNING" },
+    { interval: 2000, enabled: can("VALIDATION:VIEW"), isDone: (j) => !jobActive(j.status) },
   )
   const job = poll.data
   const emails = useTableQuery<EmailResult>({
@@ -60,7 +60,7 @@ export function JobView() {
   }
 
   const status = jobStatus(job.status)
-  const running = job.status === "RUNNING"
+  const running = jobActive(job.status)
   const counts = jobCounts(job)
 
   async function act(path: string, done: string) {
@@ -97,7 +97,7 @@ export function JobView() {
         <h1 style={{ wordBreak: "break-word" }}>{job.name}</h1>
         <span className={`pill ${status.tone}`}>{status.label}</span>
         <div className="actions">
-          {can("VALIDATION:RUN") && running && <button className="btn" disabled={busy} onClick={() => setConfirm("stop")}><Square />Stop</button>}
+          {can("VALIDATION:RUN") && job.status === "RUNNING" && <button className="btn" disabled={busy} onClick={() => setConfirm("stop")}><Square />Stop</button>}
           {can("VALIDATION:RUN") && job.status === "STOPPED" && job.pending > 0 &&
             <button className="btn primary" disabled={busy} onClick={() => act("resume", "Job resumed")}><Play />Resume</button>}
           {can("VALIDATION:RUN") && !running && job.unknown > 0 &&
@@ -110,11 +110,14 @@ export function JobView() {
         Started {when(job.startedAt)}{job.startedBy ? ` by ${job.startedBy}` : ""}
         {job.finishedAt ? ` · finished ${when(job.finishedAt)}` : ""}
         {job.retries > 0 ? ` · unknown retried ${job.retries}×` : ""}
+        {job.list && <>{" · from "}{job.list.publicId
+          ? <Link href={`/lists/emails/${job.list.publicId}`}>{job.list.name}{job.list.part ? ` · part ${job.list.part}` : ""}</Link>
+          : <span>a deleted list{job.list.part ? ` (part ${job.list.part})` : ""}</span>}</>}
         {" · "}<LiveStatus status={poll.status} updatedAt={poll.updatedAt} failures={poll.failures} />
       </p>
 
       {job.message && (
-        <Banner tone={job.status === "STOPPED" ? "amber" : "blue"} title={job.status === "STOPPED" ? "Stopped" : "Note"} style={{ marginBottom: 16 }}>
+        <Banner tone={job.status === "STOPPED" ? "amber" : "blue"} title={job.status === "STOPPED" ? "Stopped" : job.status === "PREPARING" ? "Preparing" : "Note"} style={{ marginBottom: 16 }}>
           <p>{job.message}</p>
         </Banner>
       )}
@@ -167,6 +170,15 @@ export function JobView() {
               {job.checked > 0
                 ? <a className="btn" href={`/api/v1/validation/jobs/${id}/export?category=DETAILS`} download><FileSpreadsheet />Detailed CSV</a>
                 : <button className="btn" disabled><FileSpreadsheet />Detailed CSV</button>}
+              {job.list && (
+                <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginTop: 4 }}>
+                  <span className="small muted" style={{ width: "100%" }}>CSV with the list&apos;s own columns, one result:</span>
+                  {CATEGORIES.filter((c) => counts[c] > 0).map((c) => (
+                    <a key={c} className="btn sm" href={`/api/v1/validation/jobs/${id}/export?category=${c}&format=csv`} download>
+                      <FileSpreadsheet />{categoryMeta(c).label}</a>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

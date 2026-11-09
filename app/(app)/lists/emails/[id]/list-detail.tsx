@@ -17,6 +17,7 @@ import { when } from "@/lib/format"
 import { delimiterLabel, type ListDetail, type ListItem, type ListMember, type ListPart, listStatus } from "@/lib/lists"
 import { count } from "@/lib/table"
 import { ImportFlow, ImportReport } from "../../import-flow"
+import { PartActions, ValidateListButton } from "../../validate-actions"
 import { RunningBadge, ValidationSummary } from "../../validation-summary"
 
 /** One list: its details, import report, latest validation, parts, and its addresses page by page. */
@@ -72,6 +73,7 @@ export function ListDetailView() {
         <h1 style={{ wordBreak: "break-word" }}>{list.name}</h1>
         <span className={`pill ${st.tone}`}>{st.label}</span>
         <div className="actions">
+          {ready && <ValidateListButton list={list} />}
           {ready && can("LISTS:EXPORT") && <a className="btn" href={`/api/v1/lists/${id}/export`} download><Download />Export CSV</a>}
           {can("LISTS:EDIT") && <button className="btn" onClick={() => setEditing(true)}><Pencil />Edit</button>}
           {can("LISTS:DELETE") && <button className="btn text-danger" onClick={() => setDeleting(true)} aria-label="Delete list"><Trash2 /></button>}
@@ -149,6 +151,7 @@ function PartsCard({ list, parts }: { list: ListItem; parts: ListPart[] }) {
                 <td className="muted small num">{count(p.firstSeq)}–{count(p.lastSeq)}</td>
                 <td>{p.running ? <RunningBadge job={p.running} /> : <span className="muted">—</span>}</td>
                 <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                  <PartActions list={list} part={p} />
                   {can("LISTS:EXPORT") && <a className="btn sm" href={`/api/v1/lists/${list.publicId}/export?part=${p.partNo}`} download aria-label={`Export part ${p.partNo}`}><Download /></a>}
                 </td>
               </tr>

@@ -64,4 +64,14 @@ describe("JobView", () => {
     expect(screen.getByText("Done")).toBeTruthy()
     expect(screen.queryByText("Exports")).toBeNull()
   })
+  it("a job on a list links to it, offers CSVs with the list's columns, and can't be stopped while preparing", async () => {
+    backend(["VALIDATION:VIEW", "VALIDATION:RUN", "VALIDATION:EXPORT"], job({ source: "LIST", status: "PREPARING",
+      message: "Copying the list's addresses: 50,000 of 120,000.", list: { publicId: "l1", name: "Leads", part: 2 } }))
+    render(<SessionProvider><JobView /></SessionProvider>)
+    expect(await screen.findByText("Preparing", { selector: ".pill" })).toBeTruthy()
+    expect(screen.getByText(/50,000 of 120,000/)).toBeTruthy()
+    expect(screen.getByRole("link", { name: "Leads · part 2" }).getAttribute("href")).toBe("/lists/emails/l1")
+    expect(screen.queryByRole("button", { name: /Stop/ })).toBeNull()
+    expect(screen.getByRole("link", { name: "Bounce" }).getAttribute("href")).toBe("/api/v1/validation/jobs/j1/export?category=BOUNCE&format=csv")
+  })
 })

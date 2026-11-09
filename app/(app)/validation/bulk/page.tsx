@@ -1,14 +1,15 @@
 "use client"
 
-import { FileUp, Play } from "lucide-react"
+import { ClipboardPaste, FileUp, List, Play } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Suspense, useCallback, useEffect, useRef, useState } from "react"
 
 import { useSession } from "@/components/md/session"
 import { ErrorState, Forbidden, LoadingState } from "@/components/md/states"
 import { Banner, FieldError } from "@/components/md/ui"
 import { api, ApiError, describe } from "@/lib/api"
+import { type ListDetail, type ListItem } from "@/lib/lists"
 import { count } from "@/lib/table"
 import type { ValidationJob, ValidationServer } from "@/lib/types"
 import { lineCount } from "@/lib/validation"
@@ -17,14 +18,30 @@ import { PacingCard } from "./pacing-card"
 const MAX_EMAILS = 50_000
 const MAX_FILE = 3 * 1024 * 1024
 
-/**
- * Bulk validation: paste addresses (or open a .txt / .csv file), choose one or
- * more servers, start. The job runs in the background: closing the page
- * changes nothing. Lists from List management come later.
- */
 export default function BulkValidationPage() {
+  return (
+    <Suspense fallback={<div className="page muted">Loading…</div>}>
+      <BulkValidation />
+    </Suspense>
+  )
+}
+
+/**
+ * Bulk validation: a list from List management (or one of its parts: its
+ * addresses are read on the server, no size limit), or pasted addresses for a
+ * quick test (or a .txt / .csv up to 3 MB); choose one or more servers,
+ * start. The job runs in the background: closing the page changes nothing.
+ */
+function BulkValidation() {
   const { can } = useSession()
   const router = useRouter()
+  const params = useSearchParams()
+  const canLists = can("LISTS:VIEW") && can("LISTS:RUN")
+  const [source, setSource] = useState<"LIST" | "PASTE">(canLists ? "LIST" : "PASTE")
+  const [lists, setLists] = useState<ListItem[] | null>(null)
+  const [listId, setListId] = useState(params.get("list") ?? "")
+  const [part, setPart] = useState(params.get("part") ?? "")
+  const [detail, setDetail] = useState<ListDetail | null>(null)
   const file = useRef<HTMLInputElement>(null)
   const [servers, setServers] = useState<ValidationServer[] | null>(null)
   const [serversError, setServersError] = useState<unknown>(null)
@@ -46,6 +63,16 @@ export default function BulkValidationPage() {
     if (can("VALIDATION:VIEW")) loadServers()
   }, [can, loadServers])
   useEffect(() => { document.title = "Bulk validation · MasterDB" }, [])
+  useEffect(() => {
+    if (!canLists) return
+    api<{ items: ListItem[] }>("/api/v1/lists?status=READY&size=100&sort=createdAt,desc").then((p) => setLists(p.items), () => setLists([]))
+  }, [canLists])
+  useEffect(() => {
+    if (!canLists || !listId) return
+    let live = true
+    api<ListDetail>(`/api/v1/lists/${listId}`).then((d) => { if (live) setDetail(d) }, () => { if (live) setDetail(null) })
+    return () => { live = false }
+  }, [canLists, listId])
 
   if (!can("VALIDATION:VIEW")) return <Forbidden module="Validation" />
 
@@ -55,7 +82,7 @@ export default function BulkValidationPage() {
   async function openFile(f: File | undefined) {
     if (!f) return
     if (f.size > MAX_FILE) {
-      setFieldErrors({ emails: "This file is over 3 MB. Split it, or wait for List management (big lists go there)." })
+      setFieldErrors({ emails: "This file is over 3 MB: add it in List management (Add list), then validate the list." })
       return
     }
     const text = await f.text()
@@ -68,15 +95,18 @@ export default function BulkValidationPage() {
     e.preventDefault()
     setError(null)
     const errs: Record<string, string> = {}
-    if (lines === 0) errs.emails = "Paste at least one email address."
-    if (lines > MAX_EMAILS) errs.emails = `${count(lines)} lines: at most ${count(MAX_EMAILS)} per job.`
+    if (source === "LIST" && !listId) errs.list = "Choose a list."
+    if (source === "PASTE" && lines === 0) errs.emails = "Paste at least one email address."
+    if (source === "PASTE" && lines > MAX_EMAILS) errs.emails = `${count(lines)} lines: at most ${count(MAX_EMAILS)} per job. Big lists go through List management.`
     if (chosen.size === 0) errs.servers = "Choose at least one server."
     setFieldErrors(errs)
     if (Object.keys(errs).length) return
     setBusy(true)
     try {
       const job = await api<ValidationJob>("/api/v1/validation/jobs", {
-        method: "POST", body: { name: name.trim() || undefined, emails, serverIds: [...chosen] },
+        method: "POST", body: source === "LIST"
+          ? { name: name.trim() || undefined, listId, part: part ? Number(part) : undefined, serverIds: [...chosen] }
+          : { name: name.trim() || undefined, emails, serverIds: [...chosen] },
       })
       router.push(`/validation/results/${job.publicId}`)
     } catch (err) {
@@ -113,6 +143,44 @@ export default function BulkValidationPage() {
               placeholder="e.g. March leads Canada" onChange={(e) => setName(e.target.value)} disabled={busy} />
             {fieldErrors.name && <FieldError text={fieldErrors.name} />}
           </div>
+          {canLists && (
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }} role="radiogroup" aria-label="What to validate">
+              <button type="button" role="radio" aria-checked={source === "LIST"} className={`btn ${source === "LIST" ? "primary" : ""}`}
+                onClick={() => { setSource("LIST"); setFieldErrors({}) }} disabled={busy}><List />A list</button>
+              <button type="button" role="radio" aria-checked={source === "PASTE"} className={`btn ${source === "PASTE" ? "primary" : ""}`}
+                onClick={() => { setSource("PASTE"); setFieldErrors({}) }} disabled={busy}><ClipboardPaste />Paste (quick test)</button>
+            </div>
+          )}
+          {source === "LIST" ? (
+            <div className="grid-2" style={{ gap: "0 16px" }}>
+              <div className="field">
+                <label className="label" htmlFor="b-list">List</label>
+                <select id="b-list" className={`input ${fieldErrors.list ? "invalid" : ""}`} value={listId} disabled={busy || !lists}
+                  onChange={(e) => { setListId(e.target.value); setPart(""); setDetail(null); setFieldErrors({}) }}>
+                  <option value="">{lists ? (lists.length ? "Choose a list" : "No imported list yet") : "Loading…"}</option>
+                  {listId && lists && !lists.some((l) => l.publicId === listId) && detail &&
+                    <option value={listId}>{detail.list.name} ({count(detail.list.records)})</option>}
+                  {(lists ?? []).map((l) => <option key={l.publicId} value={l.publicId}>{l.name} ({count(l.records)})</option>)}
+                </select>
+                {fieldErrors.list ? <FieldError text={fieldErrors.list} />
+                  : <span className="small muted">The newest 100 imported lists. <Link href="/lists/emails">All lists</Link></span>}
+              </div>
+              <div className="field">
+                <label className="label" htmlFor="b-part">Part</label>
+                <select id="b-part" className="input" value={part} disabled={busy || !detail || detail.parts.length < 2}
+                  onChange={(e) => setPart(e.target.value)}>
+                  <option value="">{detail ? `The whole list (${count(detail.list.records)})` : "The whole list"}</option>
+                  {(detail?.parts.length ?? 0) > 1 && detail!.parts.map((p) => <option key={p.partNo} value={p.partNo}>Part {p.partNo} ({count(p.records)})</option>)}
+                </select>
+                <span className="small muted">No size limit: the addresses are read on the server, each once, in list order.</span>
+              </div>
+              {detail?.list.validation?.running && (
+                <p className="small" style={{ gridColumn: "1 / -1", margin: "0 0 12px" }}>
+                  A validation is already running on this list: <Link href={`/validation/results/${detail.list.validation.running.publicId}`}>open it</Link>.
+                </p>
+              )}
+            </div>
+          ) : (
           <div className="field">
             <div className="label-row">
               <label className="label" htmlFor="b-emails">Email addresses</label>
@@ -129,6 +197,7 @@ export default function BulkValidationPage() {
               <button type="button" className="btn" onClick={() => file.current?.click()} disabled={busy}><FileUp />Open a .txt or .csv file</button>
             </div>
           </div>
+          )}
           <fieldset className="field" style={{ border: 0, padding: 0, margin: "0 0 16px" }}>
             <legend className="label" style={{ marginBottom: 6 }}>Servers (the work rotates between them)</legend>
             <div style={{ display: "grid", gap: 6 }}>

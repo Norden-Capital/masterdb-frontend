@@ -56,8 +56,8 @@ npm run build
   | Lists: List emails (search, ESP / country / vertical / source / status filters, latest validation, delete with typed confirm) | `/lists/emails` |
   | Lists: one list (details, edit, import report, latest validation, parts, addresses page by page with the file's own columns, export CSV; an unfinished upload goes on here with the same file) | `/lists/emails/[id]` |
   | Validation: Email validation (one address through one server: category, reason, the provider's reply, SMTP conversation; history 90 days) | `/validation/check` |
-  | Validation: Bulk validation (paste or open a .txt/.csv, choose servers, start; pacing per provider and pauses running now) | `/validation/bulk` |
-  | Validation: Results (one row per job) and one job live (round chart of the six categories, counters, servers, stop / resume / retry unknown / delete, exports per category + detailed CSV, addresses) | `/validation/results`, `/validation/results/[id]` |
+  | Validation: Bulk validation (a list or one part, no size limit, read on the server; or paste / open a .txt/.csv for a quick test; choose servers, start; pacing per provider and pauses running now). "Validate" on a list or part opens it with the list chosen | `/validation/bulk?list=&part=` |
+  | Validation: Results (one row per job) and one job live (round chart of the six categories, counters, servers, stop / resume / retry unknown / delete, exports per category + detailed CSV, addresses; a job on a list links to it, shows "Preparing" while its addresses are copied, and adds CSVs with the list's own columns) | `/validation/results`, `/validation/results/[id]` |
   | Validation: List status (every address by its latest result, in six sections) | `/validation/status` |
   | MTA: MTA manager (start / stop / restart / reset per service or all, stop and restart confirmed; mail queue and flush; recent logs) | `/mta/manager?server=` |
 

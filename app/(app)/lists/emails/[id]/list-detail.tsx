@@ -16,6 +16,7 @@ import { api, ApiError } from "@/lib/api"
 import { when } from "@/lib/format"
 import { delimiterLabel, type ListDetail, type ListItem, type ListMember, type ListPart, listStatus } from "@/lib/lists"
 import { count } from "@/lib/table"
+import { SelectField } from "@/components/md/select-field"
 import { ImportFlow, ImportReport } from "../../import-flow"
 import { PartActions, ValidateListButton } from "../../validate-actions"
 import { RunningBadge, ValidationSummary } from "../../validation-summary"
@@ -178,17 +179,15 @@ function Members({ list, parts }: { list: ListItem; parts: ListPart[] }) {
   return (
     <>
       <h2 style={{ margin: "8px 0 12px" }}>Addresses</h2>
-      {parts.length > 1 && (
-        <div className="toolbar">
-          <select className={`filter ${t.filters.part ? "on" : ""}`} aria-label="Part" value={t.filters.part ?? ""} onChange={(e) => t.setFilter("part", e.target.value)}>
-            <option value="">Part: All ({count(list.records)})</option>
-            {parts.map((p) => <option key={p.partNo} value={p.partNo}>Part {p.partNo} ({count(p.records)})</option>)}
-          </select>
-        </div>
-      )}
       <DataTable
         table={t}
         label="Addresses"
+        filters={parts.length > 1 ? <>
+          <SelectField className={`filter ${t.filters.part ? "on" : ""}`} aria-label="Part" value={t.filters.part ?? ""} onChange={(e) => t.setFilter("part", e.target.value)}>
+            <option value="">Part: All ({count(list.records)})</option>
+            {parts.map((p) => <option key={p.partNo} value={p.partNo}>Part {p.partNo} ({count(p.records)})</option>)}
+          </SelectField>
+        </> : undefined}
         columns={columns}
         rowKey={(m) => String(m.seq)}
         search={{ placeholder: "Search by email", label: "Search addresses" }}

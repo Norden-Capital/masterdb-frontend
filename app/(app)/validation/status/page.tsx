@@ -56,17 +56,19 @@ export default function ListStatusPage() {
           : "Each address by its latest result"}</span>
       </div>
       {error ? <ErrorState title="Couldn't load the totals" error={error} onRetry={load} /> : null}
-      <div className="seg" role="tablist" aria-label="Section" style={{ flexWrap: "wrap", marginBottom: 18, maxWidth: "100%" }}>
-        <button role="tab" aria-selected={!category} className={!category ? "on" : ""} onClick={() => t.setFilter("category", "")}>
-          All {summary ? count(summary.addresses) : ""}</button>
-        {CATEGORIES.map((c) => (
-          <button key={c} role="tab" aria-selected={category === c} className={category === c ? "on" : ""} title={categoryMeta(c).meaning}
-            onClick={() => t.setFilter("category", c)}>{categoryMeta(c).label} {summary ? count(summary.categories[c] ?? 0) : ""}</button>
-        ))}
-      </div>
       <DataTable
         table={t}
         label="Addresses by latest result"
+        filters={
+        <div className="seg" role="tablist" aria-label="Section">
+          <button role="tab" aria-selected={!category} className={!category ? "on" : ""} onClick={() => t.setFilter("category", "")}>
+            All {summary ? count(summary.addresses) : ""}</button>
+          {CATEGORIES.map((c) => (
+            <button key={c} role="tab" aria-selected={category === c} className={category === c ? "on" : ""} title={categoryMeta(c).meaning}
+              onClick={() => t.setFilter("category", c)}>{categoryMeta(c).label} {summary ? count(summary.categories[c] ?? 0) : ""}</button>
+          ))}
+        </div>
+        }
         columns={columns}
         rowKey={(e) => e.email}
         search={{ placeholder: "Search by email", label: "Search addresses" }}

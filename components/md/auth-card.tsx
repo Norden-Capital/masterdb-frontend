@@ -35,10 +35,11 @@ export function BackToLogin() {
  * Sign-in errors show as a toast at the bottom centre, not as a card above
  * the form. `error` is the error object, so the same message after a new
  * failed try shows again; `text` is what the toast says (null = no toast).
+ * `until` makes it a live countdown ("{time}" in the text).
  */
-export function useErrorToast(error: unknown, text: string | null) {
+export function useErrorToast(error: unknown, text: string | null, until?: number) {
   const toast = useToast()
   useEffect(() => {
-    if (error && text) toast(text, "bad")
-  }, [error, text, toast])
+    if (error && text) toast(text, "bad", { until })
+  }, [error, text, until, toast])
 }

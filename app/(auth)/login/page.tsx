@@ -19,6 +19,7 @@ export default function LoginPage() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<ApiError | Error | null>(null)
   const [lockedFor, setLockedFor] = useState(0)
+  const [lockEnds, setLockEnds] = useState<number | undefined>(undefined)
 
   useEffect(() => {
     document.title = "Log in · MasterDB"
@@ -42,7 +43,11 @@ export default function LoginPage() {
       router.push(res.state === "TWO_FACTOR_SETUP_REQUIRED" ? "/login/setup-2fa" : "/login/2fa")
     } catch (err) {
       setError(err as Error)
-      if (err instanceof ApiError && err.code === "ACCOUNT_LOCKED") setLockedFor(err.retryAfter ?? 900)
+      if (err instanceof ApiError && err.code === "ACCOUNT_LOCKED") {
+        const sec = err.retryAfter ?? 900
+        setLockedFor(sec)
+        setLockEnds(Date.now() + sec * 1000)
+      }
       setPassword("")
       setBusy(false)
     }
@@ -51,12 +56,12 @@ export default function LoginPage() {
   const code = error instanceof ApiError ? error.code : null
   const mmss = `${Math.floor(lockedFor / 60)}:${String(lockedFor % 60).padStart(2, "0")}`
 
-  const mins = (sec?: number | null) => `${Math.floor((sec ?? 900) / 60)}:${String((sec ?? 900) % 60).padStart(2, "0")}`
   useErrorToast(error,
-    code === "ACCOUNT_LOCKED" ? `Account locked. Try again in ${mins((error as ApiError).retryAfter)} or reset your password.`
+    code === "ACCOUNT_LOCKED" ? "Account locked. Try again in {time} or reset your password."
       : code === "RATE_LIMITED" ? `Too many attempts. Wait ${wait((error as ApiError).retryAfter)}, then try again.`
         : error && !["INVALID_CREDENTIALS", "VALIDATION_FAILED"].includes(code ?? "") ? `Couldn't log in. ${describe(error)}`
-          : null)
+          : null,
+    code === "ACCOUNT_LOCKED" ? lockEnds : undefined)
 
   return (
     <AuthCard foot={<>Two-factor sign-in is required for every account.<br />Need access? Ask an Owner for an invite.</>}>

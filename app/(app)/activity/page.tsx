@@ -14,6 +14,7 @@ import { api } from "@/lib/api"
 import { dayLabel, timeWithSeconds } from "@/lib/format"
 import { count } from "@/lib/table"
 import type { ActivityEntry, Page, UserItem } from "@/lib/types"
+import { SelectField } from "@/components/md/select-field"
 
 const RANGES: { key: string; label: string; days: number | null }[] = [
   { key: "1", label: "Last 24 hours", days: 1 },
@@ -110,21 +111,21 @@ export default function ActivityPage() {
             )}
           </div>
         </div>
-        <div className="toolbar">
+        <DataTable
+          filters={<>
           {people.length > 0 && (
-            <select className={`filter ${user ? "on" : ""}`} aria-label="User" value={user} onChange={(e) => t.setFilter("user", e.target.value)}>
+            <SelectField className={`filter ${user ? "on" : ""}`} aria-label="User" value={user} onChange={(e) => t.setFilter("user", e.target.value)}>
               <option value="">User: All</option>
               {people.map((p) => <option key={p.publicId} value={p.publicId}>User: {p.fullName}</option>)}
-            </select>
+            </SelectField>
           )}
-          <select className={`filter ${action ? "on" : ""}`} aria-label="Action" value={action} onChange={(e) => t.setFilter("action", e.target.value)}>
+          <SelectField className={`filter ${action ? "on" : ""}`} aria-label="Action" value={action} onChange={(e) => t.setFilter("action", e.target.value)}>
             <option value="">Action: All</option>
             {Object.entries(ACTIONS).map(([k, m]) => <option key={k} value={k}>Action: {m.label}</option>)}
-          </select>
-          <select className={`filter ${range !== "all" ? "on" : ""}`} aria-label="Date range" value={range} onChange={(e) => t.setFilter("range", e.target.value)}>
+          </SelectField>
+          <SelectField className={`filter ${range !== "all" ? "on" : ""}`} aria-label="Date range" value={range} onChange={(e) => t.setFilter("range", e.target.value)}>
             {RANGES.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
-          </select>
-        </div>
+          </SelectField>
         {filtered && (
           <div className="fchips">
             {user && <span className="chip">User: {person?.fullName ?? "selected"} <button aria-label="Remove user filter" onClick={() => t.setFilter("user", "")}><X size={13} /></button></span>}
@@ -134,7 +135,7 @@ export default function ActivityPage() {
             <button className="link-btn small" onClick={clear}>Clear all</button>
           </div>
         )}
-        <DataTable
+          </>}
           table={t}
           label="Activity log"
           columns={columns}

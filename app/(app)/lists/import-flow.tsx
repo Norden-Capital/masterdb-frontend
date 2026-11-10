@@ -13,6 +13,7 @@ import {
   bytes, delimiterLabel, isBusy, type ListDetail, type ListItem, type ListPreview, putChunkFor, sendFile, type UploadState,
 } from "@/lib/lists"
 import { count } from "@/lib/table"
+import { SelectField } from "@/components/md/select-field"
 
 function apiError(status: number, body: Record<string, unknown>, requestId: string | null): Error {
   return new ApiError(status, String(body.code ?? (status >= 500 ? "INTERNAL_ERROR" : "BAD_REQUEST")),
@@ -204,9 +205,9 @@ function MappingStage({ list, onStarted }: { list: ListItem; onStarted: () => vo
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "end", marginBottom: 16 }}>
           <div className="field" style={{ margin: 0, minWidth: 220 }}>
             <label className="label" htmlFor="map-col">Email column</label>
-            <select id="map-col" className="input" value={column} onChange={(e) => setColumn(Number(e.target.value))} disabled={busy}>
+            <SelectField id="map-col" className="input" value={column} onChange={(e) => setColumn(Number(e.target.value))} disabled={busy}>
               {names.map((n, i) => <option key={i} value={i}>{n} ({looks(i)} of {rows.length} rows look like an email)</option>)}
-            </select>
+            </SelectField>
           </div>
           <label style={{ display: "flex", gap: 8, alignItems: "center", paddingBottom: 8 }}>
             <input type="checkbox" checked={header} onChange={(e) => setHeader(e.target.checked)} disabled={busy} />

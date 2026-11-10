@@ -1,19 +1,23 @@
 "use client"
 
-import { Ellipsis, Globe, LayoutDashboard, List, LogOut, Server, ShieldCheck, UserRound, Users } from "lucide-react"
+import { Ellipsis, LogOut, UserRound } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
+import {
+  DashboardIcon, DnsIcon, HelpIcon, ListsIcon, LogoutIcon, ServersIcon, SettingsIcon, UsersIcon, ValidationIcon,
+} from "@/components/md/rail-icons"
 import { useSession } from "@/components/md/session"
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { initials } from "@/lib/format"
 import { activeTab, moduleFor, moduleHref, type NavModule, visibleModules, visibleTabs } from "@/lib/nav"
 
-type Module = NavModule & { icon: React.ComponentType }
+type Module = NavModule & { icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }
 
 /**
  * The menu: modules in the icon rail, each module's pages as tabs under the
@@ -21,30 +25,30 @@ type Module = NavModule & { icon: React.ComponentType }
  * "Add …" pages are reached from the button on the module's list page.
  */
 const MODULES: Module[] = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, tabs: [{ label: "Dashboard", href: "/" }] },
-  { key: "lists", label: "Lists", icon: List,
+  { key: "dashboard", label: "Dashboard", icon: DashboardIcon, tabs: [{ label: "Dashboard", href: "/" }] },
+  { key: "lists", label: "Lists", icon: ListsIcon,
     tabs: [{ label: "Lists", href: "/lists/emails", perm: "LISTS:VIEW" }],
     extra: [{ label: "Add list", href: "/lists/add", perm: "LISTS:CREATE" }] },
-  { key: "validation", label: "Validation", icon: ShieldCheck, tabs: [
+  { key: "validation", label: "Validation", icon: ValidationIcon, tabs: [
     { label: "Check one email", href: "/validation/check", perm: "VALIDATION:VIEW" },
     { label: "Bulk validation", href: "/validation/bulk", perm: "VALIDATION:VIEW" },
     { label: "Results", href: "/validation/results", perm: "VALIDATION:VIEW" },
     { label: "List status", href: "/validation/status", perm: "VALIDATION:VIEW" },
   ] },
-  { key: "dns", label: "DNS", icon: Globe,
+  { key: "dns", label: "DNS", icon: DnsIcon,
     tabs: [{ label: "Domains", href: "/dns/domains", perm: "DNS:VIEW" }, { label: "Namecheap account", href: "/dns/namecheap", perm: "DNS:VIEW" }],
     extra: [{ label: "Add domain", href: "/dns/add-domain", perm: "DNS:CREATE" }] },
-  { key: "servers", label: "Servers", icon: Server,
+  { key: "servers", label: "Servers", icon: ServersIcon,
     tabs: [
       { label: "Servers", href: "/servers/list", perm: "SERVERS:VIEW" },
       { label: "MTA list", href: "/mta/list", perm: "MTA:VIEW" },
       { label: "MTA manager", href: "/mta/manager", perm: "MTA:VIEW" },
     ],
     extra: [{ label: "Add VPS server", href: "/servers/add", perm: "SERVERS:CREATE" }, { label: "Install MTA", href: "/mta/install", perm: "MTA:CREATE" }] },
-  { key: "users", label: "Users", icon: Users,
+  { key: "users", label: "Users", icon: UsersIcon,
     tabs: [{ label: "Users & permissions", href: "/users", perm: "USERS:VIEW" }, { label: "Activity log", href: "/activity", perm: "ACTIVITY_LOG:VIEW" }] },
   { key: "account", label: "My account", icon: UserRound, hidden: true, tabs: [{ label: "My account", href: "/account" }] },
-  { key: "dev", label: "Components", icon: LayoutDashboard, hidden: true, tabs: [{ label: "Components", href: "/dev/components" }] },
+  { key: "dev", label: "Components", icon: DashboardIcon, hidden: true, tabs: [{ label: "Components", href: "/dev/components" }] },
 ]
 
 /** Phone bottom bar: these four, then "More" for the rest. */
@@ -87,24 +91,39 @@ export function AppFrame({ children }: { children: React.ReactNode }) {
           <span className="avatar">{initials(me.fullName)}</span>
           <div><b>{me.fullName}</b><span>{me.isOwner ? "Owner" : "Custom permissions"}</span></div>
         </Link>
-        <button className="tb-logout" title="Log out" aria-label="Log out" aria-haspopup="dialog" onClick={() => setConfirmLogout(true)}>
-          <LogOut />
-        </button>
       </header>
 
+      <TooltipProvider delay={150}>
       <nav className="sidebar" aria-label="Main">
         {modules.map((m) => {
           const Icon = m.icon
           const href = moduleHref(m, can) ?? "/"
           const active = current?.key === m.key
           return (
-            <Link className={`nav-item ${active ? "active" : ""}`} href={href} key={m.key} title={m.label} aria-label={m.label}
-              aria-current={active ? "page" : undefined}>
-              <Icon /><span>{m.label}</span>
-            </Link>
+            <RailTip key={m.key} label={m.label}>
+              <Link className={`nav-item ${active ? "active" : ""}`} href={href} aria-label={m.label}
+                aria-current={active ? "page" : undefined}>
+                <Icon /><span>{m.label}</span>
+              </Link>
+            </RailTip>
           )
         })}
+        <span className="spacer" />
+        {/* What Help does is still to be decided by the owner; it does nothing yet. */}
+        <RailTip label="Help"><button type="button" className="nav-item" aria-label="Help"><HelpIcon /><span>Help</span></button></RailTip>
+        <RailTip label="Settings">
+          <Link className={`nav-item ${current?.key === "account" ? "active" : ""}`} href="/account" aria-label="Settings">
+            <SettingsIcon /><span>Settings</span>
+          </Link>
+        </RailTip>
+        <RailTip label="Log out">
+          <button type="button" className="nav-item nav-logout" aria-label="Log out" aria-haspopup="dialog"
+            onClick={() => setConfirmLogout(true)}>
+            <LogoutIcon /><span>Log out</span>
+          </button>
+        </RailTip>
       </nav>
+      </TooltipProvider>
 
       <main className="main">
         {tabs.length > 1 && (
@@ -160,10 +179,22 @@ export function AppFrame({ children }: { children: React.ReactNode }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { setConfirmLogout(false); logout() }}>Log out</AlertDialogAction>
+            <AlertDialogAction className="bg-destructive text-white hover:bg-destructive/90" onClick={() => { setConfirmLogout(false); logout() }}>
+              Log out
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  )
+}
+
+/** shadcn tooltip to the right of a rail icon. */
+function RailTip({ label, children }: { label: string; children: React.ReactElement }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger render={children} />
+      <TooltipContent side="right" sideOffset={10}>{label}</TooltipContent>
+    </Tooltip>
   )
 }

@@ -6,8 +6,7 @@ import { backendFetch } from "@/lib/backend"
 
 type Status = { service: string; status: string; version: string; time: string }
 
-// Asks the backend directly from the server, with the proxy secret (see
-// lib/backend.ts). Nothing is sent to the browser but the result.
+// Asks the backend directly from the server (lib/backend.ts). Nothing is sent to the browser but the result.
 async function fetchStatus(): Promise<Status | null> {
   try {
     const res = await backendFetch("/api/v1/status", {

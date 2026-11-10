@@ -7,12 +7,13 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react"
 
 import { useSession } from "@/components/md/session"
 import { ErrorState, Forbidden, LoadingState } from "@/components/md/states"
-import { Banner, FieldError } from "@/components/md/ui"
+import { FieldError, PageWarning } from "@/components/md/ui"
 import { api, ApiError, describe } from "@/lib/api"
 import { type ListDetail, type ListItem } from "@/lib/lists"
 import { count } from "@/lib/table"
 import type { ValidationJob, ValidationServer } from "@/lib/types"
 import { lineCount } from "@/lib/validation"
+import { SelectField } from "@/components/md/select-field"
 import { PacingCard } from "./pacing-card"
 
 const MAX_EMAILS = 50_000
@@ -123,17 +124,17 @@ function BulkValidation() {
     <div className="page">
       <div className="page-head">
         <h1>Bulk validation</h1>
+        {servers && ready.length === 0 && (
+          <PageWarning title="No server can validate yet">
+          <p>A server needs to be connected over SSH and linked to a domain. {can("SERVERS:VIEW") && <Link href="/servers/list">Open the server list</Link>}</p>
+          </PageWarning>
+        )}
         <span className="meta">Runs in the background: you can close the page.</span>
         <div className="actions"><Link className="btn" href="/validation/results">Results</Link></div>
       </div>
 
       {serversError ? <ErrorState title="Couldn't load the servers" error={serversError} onRetry={loadServers} /> : null}
       {!servers && !serversError && <LoadingState />}
-      {servers && ready.length === 0 && (
-        <Banner tone="amber" title="No server can validate yet" style={{ marginBottom: 16 }}>
-          <p>A server needs to be connected over SSH and linked to a domain. {can("SERVERS:VIEW") && <Link href="/servers/list">Open the server list</Link>}</p>
-        </Banner>
-      )}
 
       {servers && ready.length > 0 && (can("VALIDATION:RUN") ? (
         <form className="card card-pad" onSubmit={start} noValidate style={{ marginBottom: 24 }}>
@@ -155,23 +156,23 @@ function BulkValidation() {
             <div className="grid-2" style={{ gap: "0 16px" }}>
               <div className="field">
                 <label className="label" htmlFor="b-list">List</label>
-                <select id="b-list" className={`input ${fieldErrors.list ? "invalid" : ""}`} value={listId} disabled={busy || !lists}
+                <SelectField id="b-list" className={`input ${fieldErrors.list ? "invalid" : ""}`} value={listId} disabled={busy || !lists}
                   onChange={(e) => { setListId(e.target.value); setPart(""); setDetail(null); setFieldErrors({}) }}>
                   <option value="">{lists ? (lists.length ? "Choose a list" : "No imported list yet") : "Loading…"}</option>
                   {listId && lists && !lists.some((l) => l.publicId === listId) && detail &&
                     <option value={listId}>{detail.list.name} ({count(detail.list.records)})</option>}
                   {(lists ?? []).map((l) => <option key={l.publicId} value={l.publicId}>{l.name} ({count(l.records)})</option>)}
-                </select>
+                </SelectField>
                 {fieldErrors.list ? <FieldError text={fieldErrors.list} />
                   : <span className="small muted">The newest 100 imported lists. <Link href="/lists/emails">All lists</Link></span>}
               </div>
               <div className="field">
                 <label className="label" htmlFor="b-part">Part</label>
-                <select id="b-part" className="input" value={part} disabled={busy || !detail || detail.parts.length < 2}
+                <SelectField id="b-part" className="input" value={part} disabled={busy || !detail || detail.parts.length < 2}
                   onChange={(e) => setPart(e.target.value)}>
                   <option value="">{detail ? `The whole list (${count(detail.list.records)})` : "The whole list"}</option>
                   {(detail?.parts.length ?? 0) > 1 && detail!.parts.map((p) => <option key={p.partNo} value={p.partNo}>Part {p.partNo} ({count(p.records)})</option>)}
-                </select>
+                </SelectField>
                 <span className="small muted">No size limit: the addresses are read on the server, each once, in list order.</span>
               </div>
               {detail?.list.validation?.running && (

@@ -7,13 +7,14 @@ import { useCallback, useEffect, useState } from "react"
 import { type Column, DataTable } from "@/components/md/data-table"
 import { useSession } from "@/components/md/session"
 import { EmptyState, ErrorState, Forbidden, LoadingState } from "@/components/md/states"
-import { Banner, FieldError } from "@/components/md/ui"
+import { FieldError, PageWarning } from "@/components/md/ui"
 import { useTableQuery } from "@/components/md/use-table-query"
 import { api, ApiError, describe } from "@/lib/api"
 import { dayLabel, timeWithSeconds } from "@/lib/format"
 import { count } from "@/lib/table"
 import type { CheckResult, ValidationServer } from "@/lib/types"
 import { CATEGORIES, categoryMeta, looksLikeEmail } from "@/lib/validation"
+import { SelectField } from "@/components/md/select-field"
 import { CategoryPill } from "../category-pill"
 import { ResultCard } from "./result-card"
 
@@ -93,17 +94,17 @@ export default function EmailValidationPage() {
     <div className="page">
       <div className="page-head">
         <h1>Email validation</h1>
+        {servers && ready.length === 0 && (
+          <PageWarning title="No server can validate yet">
+          <p>A server needs to be connected over SSH and linked to a domain (that gives it its greeting name and sender
+            address). {can("SERVERS:VIEW") && <Link href="/servers/list">Open the server list</Link>}</p>
+          </PageWarning>
+        )}
         <span className="meta">Check one address now, through one server. No email is sent.</span>
       </div>
 
       {serversError ? <ErrorState title="Couldn't load the servers" error={serversError} onRetry={loadServers} /> : null}
       {!servers && !serversError && <LoadingState />}
-      {servers && ready.length === 0 && (
-        <Banner tone="amber" title="No server can validate yet" style={{ marginBottom: 16 }}>
-          <p>A server needs to be connected over SSH and linked to a domain (that gives it its greeting name and sender
-            address). {can("SERVERS:VIEW") && <Link href="/servers/list">Open the server list</Link>}</p>
-        </Banner>
-      )}
 
       {servers && ready.length > 0 && (
         <div className="grid-2" style={{ gap: 16, alignItems: "start", marginBottom: 24 }}>
@@ -117,13 +118,13 @@ export default function EmailValidationPage() {
             </div>
             <div className="field">
               <label className="label" htmlFor="v-server">Server</label>
-              <select id="v-server" className="input" value={serverId} disabled={busy} onChange={(e) => setServerId(e.target.value)}>
+              <SelectField id="v-server" className="input" value={serverId} disabled={busy} onChange={(e) => setServerId(e.target.value)}>
                 {servers.map((s) => (
                   <option key={s.publicId} value={s.publicId} disabled={!s.ready}>
                     {s.name} · {s.ip}{s.ready ? "" : " (not ready)"}
                   </option>
                 ))}
-              </select>
+              </SelectField>
               {chosen && (chosen.ready
                 ? <span className="small muted">Leaves from <span className="mono">{chosen.ip}</span>, greets as <span className="mono">{chosen.heloHost}</span>,
                   sender <span className="mono">{chosen.mailFrom}</span>.</span>
@@ -144,15 +145,15 @@ export default function EmailValidationPage() {
         <h2 style={{ fontSize: 18, fontWeight: 600 }}>History</h2>
         <span className="meta">{history.data ? `${count(history.data.totalItems)} checks · kept 90 days` : "Kept 90 days"}</span>
       </div>
-      <div className="toolbar">
-        <select className={`filter ${category ? "on" : ""}`} aria-label="Result" value={category}
+      <DataTable
+        filters={<>
+        <SelectField className={`filter ${category ? "on" : ""}`} aria-label="Result" value={category}
           onChange={(e) => history.setFilter("category", e.target.value)}>
           <option value="">Result: All</option>
           {CATEGORIES.map((c) => <option key={c} value={c}>Result: {categoryMeta(c).label}</option>)}
-        </select>
+        </SelectField>
         {category && <button className="link-btn small" onClick={() => history.setFilter("category", "")}><X size={13} />Clear</button>}
-      </div>
-      <DataTable
+        </>}
         table={history}
         label="Single checks"
         columns={columns}

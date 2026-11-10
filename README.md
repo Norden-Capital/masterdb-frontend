@@ -8,7 +8,7 @@ https://db.nordencapital.ca.
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000, needs BACKEND_URL + PROXY_SECRET in .env.local (see .env.example)
+npm run dev        # http://localhost:3000, needs BACKEND_URL in .env.local (see .env.example)
 npm test           # unit tests (Node's built-in runner, lib/*.test.ts)
 npm run lint
 npm run build
@@ -16,9 +16,8 @@ npm run build
 
 ## How it is put together
 
-- **`app/api/[...path]/route.ts`**: the only way to the backend. Same-origin proxy that adds
-  `X-Proxy-Secret` (server-side only), forwards the visitor's IP as `X-Client-IP` on Vercel,
-  and refuses cross-site writes with 403 `CSRF_REJECTED` (`lib/proxy-guards.ts`).
+- **`app/api/[...path]/route.ts`**: the only way to the backend. Same-origin proxy that
+  forwards the visitor's IP as `X-Client-IP` on Vercel (`lib/proxy-guards.ts`).
 - **`proxy.ts`** (Next 16's name for middleware): pages behind the login without the
   `md_session` cookie go to `/login?next=...`. Only an optimistic check; the backend decides.
 - **Design**: `app/md.css` holds the tokens and component classes (plan/design-direction.md); its last

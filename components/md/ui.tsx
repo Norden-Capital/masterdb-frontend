@@ -1,7 +1,8 @@
 "use client"
 
-import { ArrowRightToLine, Check, CircleAlert, CircleSlash, Eye, EyeOff, Lock, LockKeyhole, Mail, X } from "lucide-react"
+import { ArrowRightToLine, Check, CircleAlert, CircleSlash, Eye, EyeOff, Lock, LockKeyhole, Mail, TriangleAlert, X } from "lucide-react"
 import { useEffect, useId, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 
 import { strength } from "@/lib/password"
 import type { UserItem } from "@/lib/types"
@@ -290,6 +291,40 @@ export function Banner(props: { tone: "red" | "amber" | "blue" | "green"; icon?:
         {props.children}
       </div>
     </div>
+  )
+}
+
+/**
+ * A page's warning, placed anywhere inside `.page-head`. Open, it shows
+ * full width at the end of the page (after the table, which it pushes up);
+ * closed, a bare amber warning icon at the right end of the title row
+ * brings it back.
+ */
+export function PageWarning(props: { title: string; children?: React.ReactNode }) {
+  const [open, setOpen] = useState(true)
+  const anchor = useRef<HTMLSpanElement>(null)
+  const [hosts, setHosts] = useState<{ page: Element; head: Element } | null>(null)
+  useEffect(() => {
+    const head = anchor.current?.closest(".page-head")
+    const page = anchor.current?.closest(".page")
+    if (head && page) setHosts({ page, head })
+  }, [])
+  return (
+    <>
+      <span ref={anchor} hidden />
+      {hosts && (open ? createPortal(
+        <div className="banner amber page-warning" role="status">
+          <TriangleAlert />
+          <div><b>{props.title}</b>{props.children}</div>
+          <button type="button" className="x" aria-label="Hide this warning" onClick={() => setOpen(false)}><X /></button>
+        </div>, hosts.page,
+      ) : createPortal(
+        <button type="button" className="warn-mark" title={props.title} aria-label={`Warning: ${props.title}. Show it`}
+          onClick={() => setOpen(true)}>
+          <TriangleAlert />
+        </button>, hosts.head,
+      ))}
+    </>
   )
 }
 

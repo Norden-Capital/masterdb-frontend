@@ -13,6 +13,7 @@ import { api, ApiError } from "@/lib/api"
 import { dkimKey } from "@/lib/dns"
 import { when } from "@/lib/format"
 import type { DnsSettings, DomainItem } from "@/lib/types"
+import { SelectField } from "@/components/md/select-field"
 
 /**
  * What the managed records should say (DNS job 3), used both to write them at
@@ -126,11 +127,11 @@ function SettingsForm(props: { path: string; settings: DnsSettings; onClose: () 
       </div>
       <div className="field">
         <label className="label" htmlFor="dmarcPolicy">DMARC policy</label>
-        <select id="dmarcPolicy" className="input" value={policy} onChange={(e) => setPolicy(e.target.value as DnsSettings["dmarcPolicy"])}>
+        <SelectField id="dmarcPolicy" className="input" value={policy} onChange={(e) => setPolicy(e.target.value as DnsSettings["dmarcPolicy"])}>
           <option value="none">none (monitor only)</option>
           <option value="quarantine">quarantine (old app default)</option>
           <option value="reject">reject</option>
-        </select>
+        </SelectField>
       </div>
       {input("bimiLogoUrl", "BIMI logo URL (optional, https, SVG)", logo, setLogo)}
       {input("bimiCertificateUrl", "BIMI certificate URL (optional, https)", cert, setCert)}

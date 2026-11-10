@@ -7,6 +7,7 @@ import { FieldError } from "@/components/md/ui"
 import { api, ApiError } from "@/lib/api"
 import { validIpv4, validUser } from "@/lib/servers"
 import type { DomainItem, Page, ServerItem } from "@/lib/types"
+import { SelectField } from "@/components/md/select-field"
 
 export type ServerFormValue = {
   name: string
@@ -114,10 +115,10 @@ export function ServerFields(props: {
       {domains !== null ? (
         <div className="field">
           <label className="label" htmlFor="srv-domain">Linked domain (optional)</label>
-          <select id="srv-domain" className={`input ${errors.domainId ? "invalid" : ""}`} value={v.domainId} onChange={set("domainId")}>
+          <SelectField id="srv-domain" className={`input ${errors.domainId ? "invalid" : ""}`} value={v.domainId} onChange={set("domainId")}>
             <option value="">None</option>
             {(domains ?? []).map((d) => <option key={d.publicId} value={d.publicId}>{d.name}</option>)}
-          </select>
+          </SelectField>
           {errors.domainId && <FieldError text={errors.domainId} />}
           <span className="help">Its mail host and sender become this server&apos;s identity; one server per domain.</span>
         </div>

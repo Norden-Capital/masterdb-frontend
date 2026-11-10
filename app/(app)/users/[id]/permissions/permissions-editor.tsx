@@ -12,6 +12,7 @@ import { useToast } from "@/components/md/toast"
 import { Avatar, Banner, Modal } from "@/components/md/ui"
 import { api, describe } from "@/lib/api"
 import type { Catalogue, Page, UserDetail, UserItem } from "@/lib/types"
+import { SelectField } from "@/components/md/select-field"
 
 /** Mock 10: the grid, templates, copy from another user, unsaved-changes bar and leave guard. */
 export function PermissionsEditor() {
@@ -119,7 +120,7 @@ export function PermissionsEditor() {
               {!u.isOwner && <span className="meta">{value.size} of {total} permissions</span>}
               {!u.isOwner && !self && (
                 <div className="actions">
-                  <select className="input" style={{ width: 220, height: 40 }} aria-label="Apply a template" value=""
+                  <SelectField className="input" style={{ width: 220, height: 40 }} aria-label="Apply a template" value=""
                     onChange={(e) => {
                       const t = catalogue.templates.find((x) => x.key === e.target.value)
                       if (e.target.value === "NONE") setValue(new Set())
@@ -128,7 +129,7 @@ export function PermissionsEditor() {
                     <option value="">Apply a template…</option>
                     {catalogue.templates.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
                     <option value="NONE">No access</option>
-                  </select>
+                  </SelectField>
                   <div ref={copyRef} style={{ position: "relative" }}>
                     <button className="btn" onClick={() => setCopyOpen(!copyOpen)} aria-haspopup="menu"><Copy />Copy from user</button>
                     {copyOpen && (

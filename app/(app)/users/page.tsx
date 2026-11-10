@@ -19,6 +19,7 @@ import { api, describe } from "@/lib/api"
 import { relative, when } from "@/lib/format"
 import { count } from "@/lib/table"
 import type { Catalogue, UserItem } from "@/lib/types"
+import { SelectField } from "@/components/md/select-field"
 import { InviteModal } from "./invite-modal"
 
 /** Mock 07: the team, with search, status filter, paging, row and bulk actions. */
@@ -172,16 +173,16 @@ export default function UsersPage() {
             )}
           </div>
         </div>
-        <div className="toolbar">
-          <select className={`filter ${status ? "on" : ""}`} aria-label="Status" value={status}
+        <DataTable
+          filters={<>
+          <SelectField className={`filter ${status ? "on" : ""}`} aria-label="Status" value={status}
             onChange={(e) => t.setFilter("status", e.target.value)}>
             <option value="">Status: All</option>
             <option value="ACTIVE">Status: Active</option>
             <option value="INVITED">Status: Invited</option>
             <option value="DISABLED">Status: Disabled</option>
-          </select>
-        </div>
-        <DataTable
+          </SelectField>
+          </>}
           table={t}
           label="Users"
           columns={columns}

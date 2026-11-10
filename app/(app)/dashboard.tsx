@@ -30,7 +30,7 @@ export function Dashboard() {
     <div className="page-head">
       <h1>Dashboard</h1>
       <span className="meta"><LiveStatus status={p.status} updatedAt={p.updatedAt} failures={p.failures} /></span>
-      <div className="actions"><button className="btn" onClick={p.refresh}><RefreshCw />Refresh</button></div>
+      <div className="actions"><button className="btn icon-only" onClick={p.refresh} title="Refresh" aria-label="Refresh"><RefreshCw /></button></div>
     </div>
   )
   if (p.error && !s) return <>{head}<ErrorState title="Couldn't load the numbers" error={p.error} onRetry={p.refresh} /></>

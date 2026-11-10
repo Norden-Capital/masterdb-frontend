@@ -86,8 +86,6 @@ export function describe(error: unknown): string {
       return "The MasterDB server cannot be reached right now. Try again in a moment."
     case "RATE_LIMITED":
       return `Too many attempts from your network. Try again in ${wait(error.retryAfter)}.`
-    case "CSRF_REJECTED":
-      return "This request was blocked because it did not come from the MasterDB website. Reload the page."
     case "FORBIDDEN":
       return error.detail || "You don't have permission to do this."
     case "INTERNAL_ERROR":

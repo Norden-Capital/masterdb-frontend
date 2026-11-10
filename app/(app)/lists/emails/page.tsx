@@ -9,17 +9,21 @@ import { ConfirmDialog } from "@/components/md/dialogs"
 import { useSession } from "@/components/md/session"
 import { EmptyState, Forbidden } from "@/components/md/states"
 import { useToast } from "@/components/md/toast"
+import { useAddSheet } from "@/components/md/use-add-sheet"
 import { useTableQuery } from "@/components/md/use-table-query"
 import { api, describe } from "@/lib/api"
 import { when } from "@/lib/format"
 import { type ListFacets, type ListItem, listStatus } from "@/lib/lists"
 import { count } from "@/lib/table"
+import { SelectField } from "@/components/md/select-field"
 import { ValidateListButton } from "../validate-actions"
 import { ValidationSummary } from "../validation-summary"
+import { AddListSheet } from "../add-list-sheet"
 
 /** List emails: every list with its records and details, search, filters, delete. */
 export default function ListsPage() {
   const { can } = useSession()
+  const [adding, setAdding] = useAddSheet()
   const toast = useToast()
   const t = useTableQuery<ListItem>({
     path: "/api/v1/lists", enabled: can("LISTS:VIEW"), filters: { esp: "", country: "", vertical: "", source: "", status: "" },
@@ -81,34 +85,34 @@ export default function ListsPage() {
 
   const f = t.filters
   const facet = (key: "esp" | "country" | "vertical", label: string) => (
-    <select className={`filter ${f[key] ? "on" : ""}`} aria-label={label} value={f[key] ?? ""} onChange={(e) => t.setFilter(key, e.target.value)}>
+    <SelectField className={`filter ${f[key] ? "on" : ""}`} aria-label={label} value={f[key] ?? ""} onChange={(e) => t.setFilter(key, e.target.value)}>
       <option value="">{label}: All</option>
       {(facets?.[key] ?? []).map((v) => <option key={v} value={v}>{label}: {v}</option>)}
-    </select>
+    </SelectField>
   )
   return (
     <div className="page">
       <div className="page-head">
         <h1>{t.data ? `${count(t.data.totalItems)} List${t.data.totalItems === 1 ? "" : "s"}` : "Lists"}</h1>
         {t.data && <span className="meta">{t.filtered ? "matching" : "in MasterDB"}</span>}
-        <div className="actions">{can("LISTS:CREATE") && <Link className="btn primary" href="/lists/add"><Plus />Add list</Link>}</div>
+        <div className="actions">{can("LISTS:CREATE") && <button className="btn primary" onClick={() => setAdding(true)}><Plus />Add list</button>}</div>
       </div>
-      <div className="toolbar">
+      <DataTable
+        filters={<>
         {facet("esp", "ESP")}
         {facet("country", "Country")}
         {facet("vertical", "Vertical")}
-        <select className={`filter ${f.source ? "on" : ""}`} aria-label="Source" value={f.source ?? ""} onChange={(e) => t.setFilter("source", e.target.value)}>
+        <SelectField className={`filter ${f.source ? "on" : ""}`} aria-label="Source" value={f.source ?? ""} onChange={(e) => t.setFilter("source", e.target.value)}>
           <option value="">Source: All</option>
           <option value="FILE">Source: Local file</option>
           <option value="DRIVE">Source: Google Drive</option>
-        </select>
-        <select className={`filter ${f.status ? "on" : ""}`} aria-label="Status" value={f.status ?? ""} onChange={(e) => t.setFilter("status", e.target.value)}>
+        </SelectField>
+        <SelectField className={`filter ${f.status ? "on" : ""}`} aria-label="Status" value={f.status ?? ""} onChange={(e) => t.setFilter("status", e.target.value)}>
           <option value="">Status: All</option>
           {(["READY", "IMPORTING", "QUEUED", "MAPPING", "UPLOADING", "DOWNLOADING", "FAILED"] as const).map((s) =>
             <option key={s} value={s}>Status: {listStatus(s).label}</option>)}
-        </select>
-      </div>
-      <DataTable
+        </SelectField>
+        </>}
         table={t}
         label="Lists"
         columns={columns}
@@ -124,7 +128,7 @@ export default function ListsPage() {
               action={<button className="btn" onClick={t.clearFilters}>Clear filters</button>} />
           }
           return <EmptyState icon={<List />} title="No lists yet" text="Upload a .txt or .csv file, or add one from a Google Drive link."
-            action={can("LISTS:CREATE") && <Link className="btn primary" href="/lists/add"><Plus />Add list</Link>} />
+            action={can("LISTS:CREATE") && <button className="btn primary" onClick={() => setAdding(true)}><Plus />Add list</button>} />
         }}
         bulkActions={(chosen) => can("LISTS:DELETE") && <button className="btn text-danger" onClick={() => setConfirm(chosen)}><Trash2 />Delete</button>}
       />
@@ -134,6 +138,7 @@ export default function ListsPage() {
         typed={confirm?.length === 1 ? confirm[0].name : undefined}
         confirmLabel={confirm?.length === 1 ? "Delete list" : `Delete ${confirm?.length ?? 0} lists`}
         onConfirm={() => confirm ? remove(confirm) : undefined} />
+      {can("LISTS:CREATE") && <AddListSheet open={adding} onClose={() => setAdding(false)} onAdded={t.reload} />}
     </div>
   )
 }

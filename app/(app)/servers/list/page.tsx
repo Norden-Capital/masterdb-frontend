@@ -9,17 +9,21 @@ import { ConfirmDialog } from "@/components/md/dialogs"
 import { useSession } from "@/components/md/session"
 import { EmptyState, Forbidden } from "@/components/md/states"
 import { useToast } from "@/components/md/toast"
+import { useAddSheet } from "@/components/md/use-add-sheet"
 import { useTableQuery } from "@/components/md/use-table-query"
 import { api, describe } from "@/lib/api"
 import { when } from "@/lib/format"
 import { count } from "@/lib/table"
 import type { ServerItem } from "@/lib/types"
+import { SelectField } from "@/components/md/select-field"
 import { ServerHealthPill } from "../server-health-pill"
 import { ConnectionPill, ExpiryPill } from "../server-pills"
+import { AddServerSheet } from "../add-server-sheet"
 
 /** Server management job 1: every VPS with search, filters, expiry warning and delete. */
 export default function ServerListPage() {
   const { can } = useSession()
+  const [adding, setAdding] = useAddSheet()
   const toast = useToast()
   const t = useTableQuery<ServerItem>({
     path: "/api/v1/servers", enabled: can("SERVERS:VIEW"), sort: { field: "name", dir: "asc" },
@@ -83,11 +87,12 @@ export default function ServerListPage() {
         <h1>{t.data ? `${count(t.data.totalItems)} Server${t.data.totalItems === 1 ? "" : "s"}` : "Servers"}</h1>
         {t.data && <span className="meta">{t.filtered ? "matching" : "in MasterDB"}</span>}
         <div className="actions">
-          {can("SERVERS:CREATE") && <Link className="btn primary" href="/servers/add"><Plus />Add VPS server</Link>}
+          {can("SERVERS:CREATE") && <button className="btn primary" onClick={() => setAdding(true)}><Plus />Add VPS server</button>}
         </div>
       </div>
-      <div className="toolbar">
-        <select className={`filter ${f.connection ? "on" : ""}`} aria-label="SSH" value={f.connection ?? ""}
+      <DataTable
+        filters={<>
+        <SelectField className={`filter ${f.connection ? "on" : ""}`} aria-label="SSH" value={f.connection ?? ""}
           onChange={(e) => t.setFilter("connection", e.target.value)}>
           <option value="">SSH: All</option>
           <option value="CONNECTED">SSH: Connected</option>
@@ -96,8 +101,8 @@ export default function ServerListPage() {
           <option value="AUTH_FAILED">SSH: Key refused</option>
           <option value="UNREACHABLE">SSH: Unreachable</option>
           <option value="NEW">SSH: Not connected</option>
-        </select>
-        <select className={`filter ${f.health ? "on" : ""}`} aria-label="Health" value={f.health ?? ""}
+        </SelectField>
+        <SelectField className={`filter ${f.health ? "on" : ""}`} aria-label="Health" value={f.health ?? ""}
           onChange={(e) => t.setFilter("health", e.target.value)}>
           <option value="">Health: All</option>
           <option value="OK">Health: All good</option>
@@ -105,16 +110,15 @@ export default function ServerListPage() {
           <option value="WARNING">Health: Warnings</option>
           <option value="ERROR">Health: Couldn&apos;t check</option>
           <option value="UNCHECKED">Health: Never checked</option>
-        </select>
-        <select className={`filter ${f.expiry ? "on" : ""}`} aria-label="Plan ends" value={f.expiry ?? ""}
+        </SelectField>
+        <SelectField className={`filter ${f.expiry ? "on" : ""}`} aria-label="Plan ends" value={f.expiry ?? ""}
           onChange={(e) => t.setFilter("expiry", e.target.value)}>
           <option value="">Plan ends: All</option>
           <option value="EXPIRED">Plan ends: Expired</option>
           <option value="DAYS_14">Plan ends: Within 14 days</option>
           <option value="DAYS_30">Plan ends: Within 30 days</option>
-        </select>
-      </div>
-      <DataTable
+        </SelectField>
+        </>}
         table={t}
         label="Servers"
         columns={columns}
@@ -130,7 +134,7 @@ export default function ServerListPage() {
               action={<button className="btn" onClick={t.clearFilters}>Clear filters</button>} />
           }
           return <EmptyState icon={<Server />} title="No servers yet" text="Add a VPS: MasterDB logs in with its own SSH key."
-            action={can("SERVERS:CREATE") && <Link className="btn primary" href="/servers/add"><Plus />Add VPS server</Link>} />
+            action={can("SERVERS:CREATE") && <button className="btn primary" onClick={() => setAdding(true)}><Plus />Add VPS server</button>} />
         }}
         bulkActions={(chosen) => (
           <>
@@ -144,6 +148,7 @@ export default function ServerListPage() {
         text="They're removed from MasterDB with their trusted host keys and history. Nothing changes on the VPS itself."
         confirmLabel={confirm?.length === 1 ? "Delete server" : `Delete ${confirm?.length ?? 0} servers`}
         onConfirm={() => confirm ? remove(confirm) : undefined} />
+      {can("SERVERS:CREATE") && <AddServerSheet open={adding} onClose={() => setAdding(false)}/>}
     </div>
   )
 }

@@ -1,33 +1,35 @@
 "use client"
 
-import { CloudDownload, Globe, Plus, RefreshCw, Search, Trash2 } from "lucide-react"
+import { Globe, Plus, RefreshCw, Search, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 
-import { ImportModal } from "@/app/(app)/dns/import-modal"
 import { type Column, DataTable } from "@/components/md/data-table"
 import { ConfirmDialog } from "@/components/md/dialogs"
 import { useSession } from "@/components/md/session"
 import { EmptyState, Forbidden } from "@/components/md/states"
 import { useToast } from "@/components/md/toast"
+import { useAddSheet } from "@/components/md/use-add-sheet"
 import { useTableQuery } from "@/components/md/use-table-query"
 import { api, describe } from "@/lib/api"
 import { expiryInfo } from "@/lib/dns"
 import { when } from "@/lib/format"
 import { count } from "@/lib/table"
 import type { DomainItem } from "@/lib/types"
+import { SelectField } from "@/components/md/select-field"
 import { HealthPill } from "./health-pill"
+import { AddDomainSheet } from "../add-domain-sheet"
 
 /** DNS job 2: every domain, by hand or from Namecheap, with search, filters, sort and delete. */
 export default function DomainListPage() {
   const { can } = useSession()
+  const [adding, setAdding] = useAddSheet()
   const toast = useToast()
   const t = useTableQuery<DomainItem>({
     path: "/api/v1/dns/domains", enabled: can("DNS:VIEW"), sort: { field: "name", dir: "asc" },
     filters: { source: "", health: "", expiry: "" },
   })
   const [confirm, setConfirm] = useState<DomainItem[] | null>(null)
-  const [fetching, setFetching] = useState(false)
   const today = useMemo(() => new Date(), [])
 
   useEffect(() => { document.title = "Domains · MasterDB" }, [])
@@ -97,35 +99,34 @@ export default function DomainListPage() {
         <h1>{t.data ? `${count(t.data.totalItems)} Domain${t.data.totalItems === 1 ? "" : "s"}` : "Domains"}</h1>
         {t.data && <span className="meta">{t.filtered ? "matching" : "in MasterDB"}</span>}
         <div className="actions">
-          {can("DNS:CREATE") && <button className="btn" onClick={() => setFetching(true)}><CloudDownload />Fetch from Namecheap</button>}
-          {can("DNS:CREATE") && <Link className="btn primary" href="/dns/add-domain"><Plus />Add domain</Link>}
+          {can("DNS:CREATE") && <button className="btn primary" onClick={() => setAdding(true)}><Plus />Add domain</button>}
         </div>
       </div>
-      <div className="toolbar">
-        <select className={`filter ${f.source ? "on" : ""}`} aria-label="Source" value={f.source ?? ""}
+      <DataTable
+        filters={<>
+        <SelectField className={`filter ${f.source ? "on" : ""}`} aria-label="Source" value={f.source ?? ""}
           onChange={(e) => t.setFilter("source", e.target.value)}>
           <option value="">Source: All</option>
           <option value="NAMECHEAP">Source: Namecheap</option>
           <option value="MANUAL">Source: Manual</option>
-        </select>
-        <select className={`filter ${f.health ? "on" : ""}`} aria-label="DNS health" value={f.health ?? ""}
+        </SelectField>
+        <SelectField className={`filter ${f.health ? "on" : ""}`} aria-label="DNS health" value={f.health ?? ""}
           onChange={(e) => t.setFilter("health", e.target.value)}>
           <option value="">Health: All</option>
           <option value="OK">Health: All good</option>
           <option value="PROBLEM">Health: Problems</option>
           <option value="ERROR">Health: Lookup failed</option>
           <option value="UNCHECKED">Health: Not checked</option>
-        </select>
-        <select className={`filter ${f.expiry ? "on" : ""}`} aria-label="Expiry" value={f.expiry ?? ""}
+        </SelectField>
+        <SelectField className={`filter ${f.expiry ? "on" : ""}`} aria-label="Expiry" value={f.expiry ?? ""}
           onChange={(e) => t.setFilter("expiry", e.target.value)}>
           <option value="">Expiry: All</option>
           <option value="EXPIRED">Expiry: Expired</option>
           <option value="DAYS_30">Expiry: Within 30 days</option>
           <option value="DAYS_90">Expiry: Within 90 days</option>
           <option value="UNKNOWN">Expiry: Unknown</option>
-        </select>
-      </div>
-      <DataTable
+        </SelectField>
+        </>}
         table={t}
         label="Domains"
         columns={columns}
@@ -142,7 +143,7 @@ export default function DomainListPage() {
           }
           return <EmptyState icon={<Globe />} title="No domains yet"
             text="Add one by hand, or fetch the domains on the Namecheap account."
-            action={can("DNS:CREATE") && <Link className="btn primary" href="/dns/add-domain"><Plus />Add domain</Link>} />
+            action={can("DNS:CREATE") && <button className="btn primary" onClick={() => setAdding(true)}><Plus />Add domain</button>} />
         }}
         bulkActions={(chosen) => (
           <>
@@ -156,10 +157,7 @@ export default function DomainListPage() {
         text="They're removed from MasterDB with their health results and record snapshots. Nothing changes at Namecheap or in public DNS."
         confirmLabel={confirm?.length === 1 ? "Delete domain" : `Delete ${confirm?.length ?? 0} domains`}
         onConfirm={() => confirm ? remove(confirm) : undefined} />
-      {fetching && <ImportModal onClose={() => setFetching(false)} onImported={(r) => {
-        toast(`${r.added.length} domain${r.added.length === 1 ? "" : "s"} imported`)
-        t.reload()
-      }} />}
+      {can("DNS:CREATE") && <AddDomainSheet open={adding} onClose={() => setAdding(false)} onAdded={t.reload} />}
     </div>
   )
 }

@@ -188,7 +188,7 @@ i[data-lucide],svg.lucide{width:18px;height:18px;stroke-width:1.8;flex:none}
 select.input{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted-fg) 50%),linear-gradient(135deg,var(--muted-fg) 50%,transparent 50%);background-position:calc(100% - 16px) 18px,calc(100% - 11px) 18px;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
 .check{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px}
 .cb{appearance:none;width:16px;height:16px;border:1px solid var(--grey-bd);border-radius:4px;background:var(--card);display:inline-grid;place-items:center;cursor:pointer;margin:0;flex:none}
-.cb:checked,.cb:indeterminate{background:var(--selection);border-color:var(--selection)}
+.cb:checked,.cb:indeterminate{background:var(--primary);border-color:var(--primary)}
 .cb:checked::after{content:"";width:8px;height:4px;border:2px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
 .cb:indeterminate::after{content:"";width:8px;height:2px;background:#fff;border-radius:1px}
 .switch{appearance:none;width:36px;height:20px;border-radius:999px;background:var(--grey-bd);position:relative;cursor:pointer;margin:0;transition:background .15s}
@@ -789,3 +789,101 @@ body:has(.am) .toast{border:1px solid #27272A}
 .am .auth .go-back svg{width:16px;height:16px}
 .am .auth .label-row a{font-size:13px;text-decoration:none}
 .am .auth .help{margin-left:auto;margin-right:auto}
+/* Header: the spacer pushes the user and log out to the right */
+.tb-spacer{flex:1}
+/* Toasts close by themselves: a thin bar shows the time left */
+.toast{position:relative;overflow:hidden}
+.toast-timer{position:absolute;left:0;bottom:0;height:2px;width:100%;background:rgb(255 255 255 / .35);transform-origin:left;animation:toast-timer linear forwards}
+@keyframes toast-timer{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@media (prefers-reduced-motion:reduce){.toast-timer{animation:none;display:none}}
+/* Filters sit in the table's top bar, next to the search */
+.table-top{flex-wrap:wrap}
+.table-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.table-filters .filter{height:38px}
+.table-filters .fchips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0}
+/* Forms in a side sheet: two columns, one on phones */
+.sheet .grid-2{grid-template-columns:1fr 1fr;gap:0 16px}
+@media (max-width:767px){.sheet .grid-2{grid-template-columns:1fr}}
+.sheet .field{align-content:start}
+.sheet form>.field:last-child,.sheet .sheet-section>.field:last-child{margin-bottom:0}
+.sheet-section+.sheet-section{margin-top:22px;padding-top:22px;border-top:1px solid var(--border)}
+.sheet-section h3{font-size:15px;font-weight:600;margin:0 0 12px}
+/* shadcn Select in the md look: the trigger takes the .input / .filter box */
+.md-select{display:inline-flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;cursor:pointer;white-space:nowrap}
+.md-select.input{display:flex;width:100%}
+.md-select.input.invalid,.md-select[aria-invalid="true"]{border-color:var(--destructive)}
+.md-select:disabled{opacity:.6;cursor:not-allowed}
+.md-select svg{width:16px;height:16px;color:var(--muted-fg);flex:none}
+.md-select [data-slot="select-value"]{overflow:hidden;text-overflow:ellipsis}
+.md-select-menu{font-size:14px;border-radius:var(--radius);padding:4px}
+.md-select-menu [data-slot="select-item"]{padding-top:7px;padding-bottom:7px;font-size:14px;cursor:pointer}
+.md-select-menu{width:max-content;min-width:var(--anchor-width);max-width:min(360px,calc(100vw - 32px))}
+/* In the app (not sign-in) the stepper is orange too */
+.sheet .stepper li.on{background:var(--primary);color:var(--primary-fg)}
+.sheet .stepper{margin-bottom:22px}
+/* Invite templates: one row each, radio · name · one-line description */
+.tpl-list{border:0;padding:0;margin:4px 0 0;display:grid;gap:8px;min-width:0}
+.tpl-list legend{padding:0;margin-bottom:8px}
+.tpl-list label{display:flex;align-items:center;gap:10px;min-width:0;height:46px;padding:0 14px;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;background:var(--card)}
+.tpl-list label:hover{border-color:var(--border-strong)}
+.tpl-list label.on{border-color:var(--primary);background:var(--primary-soft)}
+.tpl-list input{accent-color:var(--primary);width:16px;height:16px;margin:0;flex:none}
+.tpl-list b{font-size:14px;font-weight:600;flex:none}
+.tpl-list span{font-size:13px;color:var(--muted-fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.btn svg+span,.btn>svg:last-child{margin-left:0}
+/* Rail (reference): grey filled icons; the active one only turns orange, no background */
+.sidebar .nav-item{color:var(--muted-fg);background:transparent;border:0;font:inherit;cursor:pointer}
+.sidebar .nav-item:hover{background:transparent;color:var(--fg)}
+.sidebar .nav-item.active{background:transparent;color:var(--primary)}
+.sidebar .nav-item.active::before{display:block}
+.sidebar .nav-item svg{width:22px;height:22px}
+/* Page warning: full width at the end of the page (pushes the table up); closed, a bare amber icon at the far right of the title row */
+.page-warning{margin:16px 0 0;align-items:center;flex:none}
+.page-warning>div{flex:1;min-width:0}
+.page-warning p{margin:2px 0 0}
+.page-warning .x{border:0;background:transparent;color:inherit;cursor:pointer;display:grid;place-items:center;width:28px;height:28px;border-radius:6px;flex:none}
+.page-warning .x:hover{background:rgb(0 0 0 / .06)}
+.page-warning .x svg{width:16px;height:16px}
+.warn-mark{margin-left:auto;order:99;border:0;background:transparent;padding:4px;color:var(--amber-fg);display:inline-grid;place-items:center;cursor:pointer;flex:none}
+.warn-mark svg{width:20px;height:20px}
+.warn-mark:hover{color:var(--warning,#B45309)}
+.page-head .actions~.warn-mark{margin-left:0}
+/* Table top bar: filters, then search at the far right */
+.table-top{justify-content:flex-end}
+.table-top .table-filters{justify-content:flex-end}
+/* Pager: rows per page on the left, range and arrows on the right */
+.table-card>.pager{justify-content:flex-end}
+.pager .rows-per-page{display:inline-flex;align-items:center;gap:8px;margin-right:auto}
+.pager .rows-per-page .filter{height:32px}
+@media (max-width:767px){.table-top .table-filters,.table-top .input-wrap{width:100%}.table-top .table-filters .filter{flex:1}}
+/* Column header: dots, name and sort chevron on one row */
+.t th .grip,.t th .sort-ic{display:inline-block}
+.t th{vertical-align:middle}
+.btn.icon-only{width:40px;padding:0;justify-content:center}
+
+/* Only the content scrolls: top bar, rail, page tabs and the page's title row stay put */
+@media (min-width:768px){
+  .app{height:100vh;min-height:0;overflow:hidden}
+  .sidebar{height:auto;position:static;overflow-y:auto}
+  .main{min-height:0;height:100%;overflow:hidden;display:flex;flex-direction:column}
+  .main>.page{flex:1 1 0;min-height:0;overflow:auto;padding-top:0}
+  .main>.page>.page-head:first-child,.main>.page>.back:first-child{position:sticky;top:0;z-index:5;background:var(--bg);margin:0 -32px 0;padding:28px 32px 22px}
+  .main>.page>.back:first-child+.page-head{position:sticky;top:0;z-index:5;background:var(--bg)}
+  /* list pages: the table card fills what is left, its rows scroll inside it */
+  .main>.page:has(>.table-card){overflow:hidden;padding-bottom:24px}
+  .page:has(>.table-card)>.table-card{flex:1 1 0;min-height:0}
+  .table-card>.tbl-scroll:not([hidden]){flex:1 1 0;min-height:0;overflow:auto}
+  .table-card .t thead th{position:sticky;top:0;z-index:2}
+}
+/* Page title row: title (+ actions, warning icon) on one row, the description under it */
+.page-head{row-gap:4px}
+.page-head>h1{order:0}
+.page-head>.actions{order:1}
+.page-head>.warn-mark{order:2}
+.page-head>.meta{order:3;flex-basis:100%;margin:0}
+.warn-mark{padding:2px}
+.warn-mark svg{width:16px;height:16px}
+.sidebar .nav-logout:hover{color:var(--destructive-text)}
+/* Section tabs in a table's top bar (List status): as wide as their content, on the left */
+.table-filters:has(>.seg){margin-right:auto;min-width:0;max-width:100%}
+.table-filters>.seg{flex-wrap:wrap;max-width:100%}

@@ -12,6 +12,7 @@ import { when } from "@/lib/format"
 import { count } from "@/lib/table"
 import type { ValidationJob } from "@/lib/types"
 import { CATEGORIES, categoryMeta, jobCounts, jobStatus } from "@/lib/validation"
+import { SelectField } from "@/components/md/select-field"
 
 /** Results: one row per validation job, newest first, with its counts. Opening one shows it live, with its exports. */
 export default function ValidationResultsPage() {
@@ -55,16 +56,16 @@ export default function ValidationResultsPage() {
           {can("VALIDATION:RUN") && <Link className="btn primary" href="/validation/bulk"><Play />New bulk validation</Link>}
         </div>
       </div>
-      <div className="toolbar">
-        <select className={`filter ${status ? "on" : ""}`} aria-label="Status" value={status} onChange={(e) => t.setFilter("status", e.target.value)}>
+      <DataTable
+        filters={<>
+        <SelectField className={`filter ${status ? "on" : ""}`} aria-label="Status" value={status} onChange={(e) => t.setFilter("status", e.target.value)}>
           <option value="">Status: All</option>
           <option value="PREPARING">Status: Preparing</option>
           <option value="RUNNING">Status: Running</option>
           <option value="STOPPED">Status: Stopped</option>
           <option value="COMPLETED">Status: Done</option>
-        </select>
-      </div>
-      <DataTable
+        </SelectField>
+        </>}
         table={t}
         label="Validation jobs"
         columns={columns}

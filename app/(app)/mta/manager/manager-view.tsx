@@ -13,6 +13,7 @@ import { Banner } from "@/components/md/ui"
 import { api, describe } from "@/lib/api"
 import { when } from "@/lib/format"
 import type { MtaItem, MtaLogView, MtaQueue } from "@/lib/types"
+import { SelectField } from "@/components/md/select-field"
 import { ServicePill } from "../service-pill"
 
 type Act = { service: string; action: "start" | "stop" | "restart" | "reset" }
@@ -50,10 +51,10 @@ export function ManagerView() {
       {list && list.length > 0 && (
         <div className="field" style={{ maxWidth: 420 }}>
           <label className="label" htmlFor="mta-server">Server</label>
-          <select id="mta-server" className="input" value={serverId ?? ""} onChange={(e) => router.replace(`/mta/manager?server=${e.target.value}`)}>
+          <SelectField id="mta-server" className="input" value={serverId ?? ""} onChange={(e) => router.replace(`/mta/manager?server=${e.target.value}`)}>
             <option value="" disabled>Choose a server…</option>
             {list.map((m) => <option key={m.serverId} value={m.serverId}>{m.name} · {m.domain ?? m.ip}</option>)}
-          </select>
+          </SelectField>
         </div>
       )}
       {current && <Manager key={current.serverId} initial={current} />}
@@ -227,15 +228,15 @@ function LogsCard({ base }: { base: string }) {
       <div className="card-head" style={{ flexWrap: "wrap" }}><h2>Recent logs</h2></div>
       <div className="card-pad">
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
-          <select className="input" style={{ width: "auto" }} aria-label="Log source" value={source} onChange={(e) => setSource(e.target.value)}>
+          <SelectField className="input" style={{ width: "auto" }} aria-label="Log source" value={source} onChange={(e) => setSource(e.target.value)}>
             <option value="mail">All mail logs</option>
             <option value="postfix">postfix</option>
             <option value="dovecot">dovecot</option>
             <option value="opendkim">opendkim</option>
-          </select>
-          <select className="input" style={{ width: "auto" }} aria-label="Lines" value={lines} onChange={(e) => setLines(Number(e.target.value))}>
+          </SelectField>
+          <SelectField className="input" style={{ width: "auto" }} aria-label="Lines" value={lines} onChange={(e) => setLines(Number(e.target.value))}>
             {[50, 100, 200, 500].map((n) => <option key={n} value={n}>Last {n} lines</option>)}
-          </select>
+          </SelectField>
           <button className="btn" onClick={load} disabled={busy}>{busy ? <LoaderCircle className="spin" /> : <FileText />}Show</button>
         </div>
         {error ? <ErrorState title="Couldn't read the logs" error={error} /> : null}

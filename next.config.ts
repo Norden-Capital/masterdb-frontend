@@ -38,9 +38,8 @@ const nextConfig = (phase: string): NextConfig => ({
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },
   // No rewrites: /api/* is forwarded to the backend by the Route Handler in
-  // app/api/[...path]/route.ts, which adds the proxy secret the backend
-  // requires (a rewrite cannot add request headers). It reads BACKEND_URL and
-  // PROXY_SECRET at request time, server-side only.
+  // app/api/[...path]/route.ts, which adds the visitor's IP (a rewrite cannot
+  // add request headers). It reads BACKEND_URL at request time, server-side only.
 });
 
 export default nextConfig;

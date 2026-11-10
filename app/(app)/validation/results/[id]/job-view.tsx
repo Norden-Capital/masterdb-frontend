@@ -19,6 +19,7 @@ import { dayLabel, timeWithSeconds, when } from "@/lib/format"
 import { count } from "@/lib/table"
 import type { EmailResult, ValidationJob } from "@/lib/types"
 import { CATEGORIES, categoryMeta, jobActive, jobCounts, jobStatus, serverState } from "@/lib/validation"
+import { SelectField } from "@/components/md/select-field"
 import { CategoryPill } from "../../category-pill"
 import { CategoryRing } from "../../category-ring"
 
@@ -184,15 +185,15 @@ export function JobView() {
         )}
       </div>
 
-      <div className="toolbar">
-        <select className={`filter ${category ? "on" : ""}`} aria-label="Result" value={category}
+      <DataTable
+        filters={<>
+        <SelectField className={`filter ${category ? "on" : ""}`} aria-label="Result" value={category}
           onChange={(e) => emails.setFilter("category", e.target.value)}>
           <option value="">Result: All ({count(job.total)})</option>
           {CATEGORIES.map((c) => <option key={c} value={c}>Result: {categoryMeta(c).label} ({count(counts[c])})</option>)}
           <option value="PENDING">Result: To check ({count(job.pending)})</option>
-        </select>
-      </div>
-      <DataTable
+        </SelectField>
+        </>}
         table={emails}
         label="Addresses"
         columns={columns}

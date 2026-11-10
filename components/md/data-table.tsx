@@ -7,6 +7,7 @@ import { ErrorBlock, SkeletonRows } from "@/components/md/states"
 import type { TableState } from "@/components/md/use-table-query"
 import { applyOrder, ariaSort, count, moveColumn, pageRange, selectionState, sortArrow, toggleAll, toggleOne } from "@/lib/table"
 import type { Page } from "@/lib/types"
+import { SelectField } from "@/components/md/select-field"
 
 export type Column<T> = {
   key: string
@@ -41,6 +42,8 @@ export function DataTable<T>(props: {
   /** Buttons in the bulk bar for the ticked rows of this page. */
   bulkActions?: (chosen: T[]) => React.ReactNode
   search?: { placeholder: string; label: string }
+  /** Filter dropdowns (and chips), shown in the table's top bar next to the search. */
+  filters?: React.ReactNode
   sizes?: number[]
   /** What to show instead of the table, or null to show the table (e.g. no rows). */
   empty: (data: Page<T>) => React.ReactNode | null
@@ -65,21 +68,13 @@ export function DataTable<T>(props: {
   return (
     <>
       <div className="table-card">
-        {(props.search || (t.data && t.data.totalItems > 0)) && (
+        {(props.search || props.filters) && (
           <div className="table-top">
+            {props.filters && <div className="table-filters">{props.filters}</div>}
             {props.search && (
               <div className="input-wrap"><Search />
                 <input className="input" type="search" placeholder={props.search.placeholder} value={t.q}
                   onChange={(e) => t.setQ(e.target.value)} aria-label={props.search.label} />
-              </div>
-            )}
-            {t.data && t.data.totalItems > 0 && (
-              <div className="right">Showing
-                <select className="filter" style={{ height: 32 }} aria-label="Rows per page" value={t.size}
-                  onChange={(e) => t.setSize(Number(e.target.value))}>
-                  {(props.sizes ?? [10, 25, 50, 100]).map((n) => <option key={n} value={n}>{n}</option>)}
-                </select>
-                of <b className="num" style={{ color: "var(--fg)" }}>{count(t.data.totalItems)}</b>
               </div>
             )}
           </div>
@@ -130,7 +125,7 @@ export function DataTable<T>(props: {
                 </tr>
               </thead>
               <tbody>
-                {t.loading && !t.data ? <SkeletonRows cols={colCount} rows={Math.min(t.size, 12)} /> : items.map((row) => {
+                {t.loading && !t.data ? <SkeletonRows cols={colCount} rows={Math.ceil(Math.min(t.size, 12) / 2)} /> : items.map((row) => {
                   const id = rowKey(row)
                   const on = t.selected.has(id)
                   return (
@@ -152,10 +147,15 @@ export function DataTable<T>(props: {
             </table>
           </div>
         )}
-        {t.data && t.data.totalPages > 1 && range && (
+        {t.data && t.data.totalItems > 0 && range && (
           <nav className="pager" aria-label="Pages">
-            <span>{count(range.from)}–{count(range.to)} of {count(range.total)}</span>
-            <span className="hide-sm">· Page {count(t.data.page + 1)} of {count(t.data.totalPages)}</span>
+            <span className="rows-per-page">Rows per page
+              <SelectField className="filter" value={t.size} aria-label="Rows per page" onChange={(e) => t.setSize(Number(e.target.value))}>
+                {(props.sizes ?? [10, 25, 50, 100]).map((n) => <option key={n} value={n}>{n}</option>)}
+              </SelectField>
+            </span>
+            <span className="pager-range">{count(range.from)}–{count(range.to)} of {count(range.total)}</span>
+            <span className="hide-sm">· Page {count(t.data.page + 1)} of {count(Math.max(1, t.data.totalPages))}</span>
             <button className="round" style={{ width: 32, height: 32 }} aria-label="Previous page"
               disabled={t.page === 0} onClick={() => t.setPage(t.page - 1)}><ChevronLeft /></button>
             <button className="round" style={{ width: 32, height: 32 }} aria-label="Next page"

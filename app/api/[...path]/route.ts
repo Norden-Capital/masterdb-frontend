@@ -137,6 +137,9 @@ function unavailable(request: Request, path: string): Response {
     "The MasterDB server cannot be reached right now. Try again in a moment.")
 }
 
+/** Same-site check for writes. TEMPORARILY OFF while the UI is being built: set back to true (todo.txt). */
+const CSRF_CHECK = false
+
 /** A write from another site: refused here, never forwarded. */
 function csrfRejected(request: Request, path: string): Response {
   console.warn(`[api proxy] ${request.method} ${path} refused: not same-origin`)
@@ -147,8 +150,13 @@ function csrfRejected(request: Request, path: string): Response {
 async function forward(request: Request): Promise<Response> {
   // The raw path and query, exactly as the browser sent them (still encoded).
   const { pathname, search } = new URL(request.url)
-  const origins = ownOrigins(request.url, request.headers, process.env.NODE_ENV !== "production")
-  if (!isSameOriginWrite(request.method, request.headers, origins)) return csrfRejected(request, pathname)
+  // TEMPORARY (2026-11-10, owner's request while the UI is being built): the
+  // same-site check is switched off. Put it back before go-live (todo.txt):
+  // set CSRF_CHECK to true.
+  if (CSRF_CHECK) {
+    const origins = ownOrigins(request.url, request.headers, process.env.NODE_ENV !== "production")
+    if (!isSameOriginWrite(request.method, request.headers, origins)) return csrfRejected(request, pathname)
+  }
 
   const config = backendConfig()
   if (!config) return unavailable(request, pathname)

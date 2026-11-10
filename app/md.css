@@ -290,6 +290,7 @@ table.t{width:100%;border-collapse:collapse;min-width:760px}
 
 /* ---------- Auth layout ---------- */
 .auth{min-height:100vh;background:var(--canvas);display:grid;place-items:center;padding:40px 16px}
+.auth>div{width:100%;display:grid;justify-items:center}
 .auth-card{background:var(--card);border-radius:12px;width:min(440px,100%);padding:36px 36px 30px}
 .auth-card.wide{width:min(520px,100%)}
 .auth-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;margin-bottom:28px}
@@ -786,5 +787,5 @@ body:has(.am) .toast{border:1px solid #27272A}
 .am .auth .link-btn{color:var(--am-link);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--am-border)}
 .am .auth .go-back{display:inline-flex;align-items:center;gap:2px}
 .am .auth .go-back svg{width:16px;height:16px}
-.am .auth .label-row a{font-size:13px}
+.am .auth .label-row a{font-size:13px;text-decoration:none}
 .am .auth .help{margin-left:auto;margin-right:auto}
